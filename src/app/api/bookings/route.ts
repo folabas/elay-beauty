@@ -70,10 +70,15 @@ export async function POST(request: Request) {
       }),
     })
 
-    let adminEmailSent = false
-    if (process.env.ADMIN_EMAIL) {
+    const adminEmails = (process.env.ADMIN_NOTIFY_EMAILS || process.env.ADMIN_EMAIL || "")
+      .split(",")
+      .map((e) => e.trim())
+      .filter(Boolean)
+
+    let adminAllFailed = adminEmails.length > 0
+    for (const adminEmail of adminEmails) {
       const result = await sendEmail({
-        to: process.env.ADMIN_EMAIL,
+        to: adminEmail,
         ...adminNotificationEmail({
           clientName: name,
           service: serviceName,
@@ -81,14 +86,14 @@ export async function POST(request: Request) {
           time,
         }),
       })
-      adminEmailSent = result.ok
+      if (result.ok) adminAllFailed = false
     }
 
     const emailWarnings: string[] = []
     if (!clientEmail.ok) {
       emailWarnings.push(`Confirmation email to you failed: ${clientEmail.error}`)
     }
-    if (process.env.ADMIN_EMAIL && !adminEmailSent) {
+    if (adminEmails.length > 0 && adminAllFailed) {
       emailWarnings.push("Admin notification email failed")
     }
 

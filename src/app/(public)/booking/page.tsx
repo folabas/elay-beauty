@@ -1,9 +1,14 @@
 "use client"
 
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
 import { PRICE_LIST, type BookingFormData } from "@/types"
+=======
+import { useState, useEffect } from "react"
+import { PRICE_LIST, SERVICE_IMAGES, type BookingFormData } from "@/types"
+>>>>>>> bd20a014556ce51102acd0a7fb382603a0eaf3ea
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
 
@@ -240,7 +245,16 @@ export default function BookingPage() {
                 : "border-primary/10 glass-card"
             }`}
           >
-            <span className="text-sm font-medium text-primary">{service.name}</span>
+            <div className="flex items-center gap-3">
+              {SERVICE_IMAGES[service.name] && (
+                <img
+                  src={SERVICE_IMAGES[service.name]}
+                  alt={service.name}
+                  className="h-10 w-10 shrink-0 rounded-md object-cover"
+                />
+              )}
+              <span className="text-sm font-medium text-primary">{service.name}</span>
+            </div>
             <span className="font-serif font-bold text-accent-dark">£{service.price}</span>
           </button>
         ))}

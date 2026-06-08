@@ -44,6 +44,7 @@ model Service {
   requiresHairInfo Boolean   @default(true)
   duration         Int?
   isActive         Boolean   @default(true)
+  imageUrl         String?
   bookings         Booking[]
   createdAt        DateTime  @default(now())
 }

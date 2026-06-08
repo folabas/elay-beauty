@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client"
 
 import { useRef, useState } from "react"
@@ -13,6 +14,10 @@ import { cn } from "@/lib/utils"
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
 }
+=======
+import { PRICE_LIST, SERVICE_CATEGORIES, SERVICE_IMAGES } from "@/types"
+import { Sparkles, Heart, Baby, GraduationCap } from "lucide-react"
+>>>>>>> bd20a014556ce51102acd0a7fb382603a0eaf3ea
 
 const categoryIcons = {
   BRAIDS: SparklesIcon,
@@ -26,6 +31,7 @@ const categoryDescriptions = {
   CHILDREN: "Gentle and stylish options for children of all ages, prioritizing comfort.",
 }
 
+<<<<<<< HEAD
 const categoryImages = {
   BRAIDS: "/images/braids_clay_illustration_1780950883300.png",
   NATURAL: "/images/natural_clay_illustration_1780950900942.png",
@@ -45,6 +51,32 @@ function PriceCard({ name, price, note }: { name: string; price: number; note?: 
       <div>
         <p className="font-medium text-primary text-sm sm:text-base">{name}</p>
         {note && <p className="mt-1 text-xs text-primary/60">{note}</p>}
+=======
+function PriceCard({
+  name,
+  price,
+  note,
+}: {
+  name: string
+  price: number
+  note?: string
+}) {
+  const imgSrc = SERVICE_IMAGES[name]
+  return (
+    <div className="group flex items-center justify-between rounded-lg border border-border bg-card p-4 shadow-soft transition-all hover:border-accent/30 hover:shadow-card">
+      <div className="flex items-center gap-4">
+        {imgSrc && (
+          <img
+            src={imgSrc}
+            alt={name}
+            className="h-16 w-16 shrink-0 rounded-lg object-cover"
+          />
+        )}
+        <div>
+          <p className="font-medium text-primary">{name}</p>
+          {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
+        </div>
+>>>>>>> bd20a014556ce51102acd0a7fb382603a0eaf3ea
       </div>
       <span className="whitespace-nowrap font-mono text-lg font-bold text-accent-dark pl-4">
         £{price}

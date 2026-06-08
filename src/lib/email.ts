@@ -1,5 +1,5 @@
 const BREVO_API_KEY = process.env.BREVO_API_KEY
-const FROM_EMAIL = "Iretomiwaelizabeth474@gmail.com"
+const FROM_EMAIL = "baskids25@gmail.com"
 const FROM_NAME = "EL.AY Beauty"
 
 const BASE_STYLE = `

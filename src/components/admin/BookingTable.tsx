@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import CancelBookingDialog from "./CancelBookingDialog"
+import BookingDetailsDialog from "./BookingDetailsDialog"
 
 interface BookingRow {
   id: string
@@ -13,6 +14,11 @@ interface BookingRow {
   price: number
   depositPaid: boolean
   status: "Pending" | "Confirmed" | "Completed" | "Cancelled"
+  hairLength?: string | null
+  hairType?: string | null
+  notes?: string | null
+  isStudent: boolean
+  cancellationReason?: string | null
 }
 
 const statusStyles: Record<string, string> = {
@@ -25,6 +31,7 @@ const statusStyles: Record<string, string> = {
 export default function BookingTable({ bookings: initial }: { bookings: BookingRow[] }) {
   const [bookings, setBookings] = useState(initial)
   const [cancelTarget, setCancelTarget] = useState<BookingRow | null>(null)
+  const [viewing, setViewing] = useState<BookingRow | null>(null)
   const [filter, setFilter] = useState<string>("all")
   const [processing, setProcessing] = useState<string | null>(null)
 
@@ -174,15 +181,23 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    {booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                    <div className="flex items-center gap-2">
+                      {booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                        <button
+                          onClick={() => setCancelTarget(booking)}
+                          disabled={processing === booking.id}
+                          className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
+                        >
+                          {processing === booking.id ? "..." : "Cancel"}
+                        </button>
+                      )}
                       <button
-                        onClick={() => setCancelTarget(booking)}
-                        disabled={processing === booking.id}
-                        className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
+                        onClick={() => setViewing(booking)}
+                        className="text-xs font-medium text-accent-dark hover:text-accent"
                       >
-                        {processing === booking.id ? "..." : "Cancel"}
+                        View
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -197,6 +212,13 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
           clientName={cancelTarget.client}
           onCancel={handleCancel}
           onClose={() => setCancelTarget(null)}
+        />
+      )}
+
+      {viewing && (
+        <BookingDetailsDialog
+          booking={viewing}
+          onClose={() => setViewing(null)}
         />
       )}
 

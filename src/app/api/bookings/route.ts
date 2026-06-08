@@ -19,6 +19,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 })
     }
 
+    const dateStart = new Date(date + "T00:00:00Z")
+    const dateEnd = new Date(date + "T23:59:59Z")
+
+    const existing = await prisma.booking.findFirst({
+      where: {
+        date: { gte: dateStart, lt: dateEnd },
+        time,
+        status: { not: "CANCELLED" },
+      },
+    })
+
+    if (existing) {
+      return NextResponse.json({ error: "This time slot is already booked" }, { status: 409 })
+    }
+
     let user = await prisma.user.findUnique({ where: { email } })
 
     if (!user) {

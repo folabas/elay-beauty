@@ -1,6 +1,33 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+const DAY_MAP: Record<string, number> = {
+  Friday: 5, Saturday: 6, Sunday: 0,
+}
+
+const DEFAULT_SCHEDULE = [
+  { day: "Friday", start: "17:00", end: "24:00" },
+  { day: "Saturday", start: "07:00", end: "12:00" },
+  { day: "Sunday", start: "15:00", end: "17:00" },
+]
+
+async function ensureAvailability() {
+  const count = await prisma.availability.count({ where: { isRecurring: true } })
+  if (count === 0) {
+    for (const s of DEFAULT_SCHEDULE) {
+      await prisma.availability.create({
+        data: {
+          dayOfWeek: DAY_MAP[s.day],
+          startTime: s.start,
+          endTime: s.end,
+          isRecurring: true,
+          isActive: true,
+        },
+      })
+    }
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -10,10 +37,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Date parameter required" }, { status: 400 })
     }
 
+    await ensureAvailability()
+
     const date = new Date(dateStr + "T00:00:00Z")
     const dayOfWeek = date.getUTCDay()
 
-    // Check if date is blocked
     const blocked = await prisma.blockedSlot.findFirst({
       where: {
         date: {
@@ -27,7 +55,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ slots: [], message: "This date is unavailable" })
     }
 
-    // Get recurring availability for this day of week
     const availability = await prisma.availability.findFirst({
       where: { dayOfWeek, isRecurring: true, isActive: true },
     })
@@ -36,7 +63,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ slots: [], message: "No availability for this day" })
     }
 
-    // Generate 1-hour slots from start to end
     const slots: string[] = []
     const [startH, startM] = availability.startTime.split(":").map(Number)
     const [endH, endM] = availability.endTime.split(":").map(Number)
@@ -47,10 +73,8 @@ export async function GET(request: Request) {
       hour++
     }
 
-    // Sunday restriction: only cornrows/crotchet (just show slots, handled in UI)
     const isSunday = dayOfWeek === 0
 
-    // Get existing bookings for this date (non-cancelled)
     const existingBookings = await prisma.booking.findMany({
       where: {
         date: {

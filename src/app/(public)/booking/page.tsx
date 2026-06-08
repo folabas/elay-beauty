@@ -572,6 +572,37 @@ export default function BookingPage() {
         </div>
       </div>
 
+      <div className="mx-auto mt-6 max-w-sm rounded-lg border border-accent/20 bg-accent/5 p-4 text-left">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-accent-dark">
+          Deposit Payment Required
+        </h3>
+        <p className="mt-1 text-xs text-muted">
+          Send £20 to secure your booking:
+        </p>
+        <div className="mt-3 space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted">Bank</span>
+            <span className="font-medium text-primary">Monzo</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Name</span>
+            <span className="font-medium text-primary">Elizabeth Ayedebinu</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Sort Code</span>
+            <span className="font-mono font-medium text-primary">04-00-03</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Account</span>
+            <span className="font-mono font-medium text-primary">34563358</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Reference</span>
+            <span className="font-mono font-medium text-primary">Hair</span>
+          </div>
+        </div>
+      </div>
+
       {emailWarnings.length > 0 && (
         <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-left">
           <p className="text-sm font-medium text-red-700">Email Notice</p>

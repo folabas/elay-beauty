@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { X } from "lucide-react"
+import { useState, useEffect } from "react"
+import { X, CalendarArrowUp } from "lucide-react"
 
 interface CancelBookingDialogProps {
   bookingId: string
   clientName: string
-  onCancel: (reason: string) => void
+  onCancel: (reason: string, alternative?: { date: string; time: string }) => void
   onClose: () => void
 }
 
@@ -18,6 +18,39 @@ export default function CancelBookingDialog({
 }: CancelBookingDialogProps) {
   const [reason, setReason] = useState("")
   const [error, setError] = useState("")
+  const [offerAlternative, setOfferAlternative] = useState(false)
+  const [altDate, setAltDate] = useState("")
+  const [altTime, setAltTime] = useState("")
+  const [altSlots, setAltSlots] = useState<{ time: string; available: boolean }[]>([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+
+  useEffect(() => {
+    if (!offerAlternative || !altDate) {
+      setAltSlots([])
+      setAltTime("")
+      return
+    }
+
+    async function fetchSlots() {
+      setLoadingSlots(true)
+      try {
+        const res = await fetch(`/api/availability/slots?date=${altDate}`)
+        if (res.ok) {
+          const data = await res.json()
+          setAltSlots(data.slots || [])
+          if (!data.slots?.some((s: { time: string }) => s.time === altTime)) {
+            setAltTime("")
+          }
+        }
+      } catch {
+        // ignore
+      } finally {
+        setLoadingSlots(false)
+      }
+    }
+
+    fetchSlots()
+  }, [altDate, offerAlternative])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,18 +58,35 @@ export default function CancelBookingDialog({
       setError("Please provide a reason for cancellation")
       return
     }
-    onCancel(reason)
+    if (offerAlternative && (!altDate || !altTime)) {
+      setError("Please select an alternative date and time")
+      return
+    }
+    onCancel(
+      reason,
+      offerAlternative ? { date: altDate, time: altTime } : undefined
+    )
+  }
+
+  const handleKeepAndClose = () => {
+    setReason("")
+    setError("")
+    setOfferAlternative(false)
+    setAltDate("")
+    setAltTime("")
+    setAltSlots([])
+    onClose()
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="mx-4 w-full max-w-md rounded-xl bg-card p-6 shadow-elevated">
+      <div className="mx-4 w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg font-bold text-primary">
-            Cancel Booking #{bookingId}
+            Cancel Booking #{bookingId.slice(0, 8)}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleKeepAndClose}
             className="rounded-lg p-1 text-muted hover:bg-border hover:text-primary"
           >
             <X className="h-5 w-5" />
@@ -48,31 +98,95 @@ export default function CancelBookingDialog({
           <span className="font-medium text-primary">{clientName}</span>?
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-6">
-          <label className="text-sm font-medium text-primary">
-            Reason for cancellation
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          <div>
+            <label className="text-sm font-medium text-primary">
+              Reason for cancellation
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => {
+                setReason(e.target.value)
+                setError("")
+              }}
+              className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+              rows={3}
+              placeholder="e.g. Client requested cancellation, unavailable on selected date..."
+              autoFocus
+            />
+          </div>
+
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={offerAlternative}
+              onChange={(e) => setOfferAlternative(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+            />
+            <div>
+              <span className="text-sm font-medium text-primary">
+                Offer an alternative time
+              </span>
+              <p className="text-xs text-muted">
+                Suggest a new date/time in the cancellation email
+              </p>
+            </div>
           </label>
-          <textarea
-            value={reason}
-            onChange={(e) => {
-              setReason(e.target.value)
-              setError("")
-            }}
-            className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
-            rows={3}
-            placeholder="e.g. Client requested cancellation, unavailable on selected date..."
-            autoFocus
-          />
-          {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
 
-          <p className="mt-3 text-xs text-muted">
-            The client will be notified via email with this reason.
-          </p>
+          {offerAlternative && (
+            <div className="rounded-lg border border-accent/30 bg-accent/5 p-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-primary">
+                  Alternative Date
+                </label>
+                <input
+                  type="date"
+                  value={altDate}
+                  onChange={(e) => setAltDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                />
+              </div>
 
-          <div className="mt-6 flex justify-end gap-3">
+              <div>
+                <label className="text-sm font-medium text-primary">
+                  Alternative Time
+                </label>
+                {loadingSlots ? (
+                  <p className="mt-1 text-sm text-muted">Loading available slots...</p>
+                ) : altSlots.length === 0 && altDate ? (
+                  <p className="mt-1 text-sm text-muted">No available slots on this date</p>
+                ) : (
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {altSlots.map((slot) => (
+                      <button
+                        key={slot.time}
+                        type="button"
+                        disabled={!slot.available}
+                        onClick={() => setAltTime(slot.time)}
+                        className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition-all ${
+                          !slot.available
+                            ? "border-border bg-card/50 text-muted-light line-through cursor-not-allowed"
+                            : altTime === slot.time
+                              ? "border-accent bg-accent text-primary"
+                              : "border-border bg-card text-muted hover:border-accent/30"
+                        }`}
+                      >
+                        {slot.time}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
+          <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleKeepAndClose}
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted hover:bg-background"
             >
               Keep Booking
@@ -81,7 +195,7 @@ export default function CancelBookingDialog({
               type="submit"
               className="rounded-lg bg-burgundy px-4 py-2 text-sm font-medium text-white hover:bg-burgundy-light"
             >
-              Cancel Booking
+              {offerAlternative ? "Cancel & Offer Time" : "Cancel Booking"}
             </button>
           </div>
         </form>

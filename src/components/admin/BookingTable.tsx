@@ -36,7 +36,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
     setTimeout(() => setToast(null), 5000)
   }
 
-  const handleCancel = async (reason: string) => {
+  const handleCancel = async (reason: string, alternative?: { date: string; time: string }) => {
     if (!cancelTarget) return
     setProcessing(cancelTarget.id)
 
@@ -44,7 +44,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
       const res = await fetch(`/api/bookings/${cancelTarget.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "cancel", reason }),
+        body: JSON.stringify({ action: "cancel", reason, alternative }),
       })
 
       if (!res.ok) {
@@ -55,7 +55,10 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
       setBookings(bookings.map((b) =>
         b.id === cancelTarget.id ? { ...b, status: "Cancelled" as const } : b
       ))
-      showToast(`Booking #${cancelTarget.id.slice(0, 8)} cancelled. Email sent to ${cancelTarget.email}.`)
+      const altMsg = alternative
+        ? ` Alternative offered: ${alternative.date} at ${alternative.time}.`
+        : ""
+      showToast(`Booking #${cancelTarget.id.slice(0, 8)} cancelled. Email sent to ${cancelTarget.email}.${altMsg}`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to cancel"}`)
     } finally {

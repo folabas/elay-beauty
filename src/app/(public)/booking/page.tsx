@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PRICE_LIST, AVAILABILITY_SCHEDULE, type BookingFormData } from "@/types"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
 
@@ -25,6 +25,38 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [availableSlots, setAvailableSlots] = useState<{ time: string; available: boolean }[]>([])
+  const [slotsLoading, setSlotsLoading] = useState(false)
+  const [isSunday, setIsSunday] = useState(false)
+
+  useEffect(() => {
+    if (!selectedDate) {
+      setAvailableSlots([])
+      setSelectedTime("")
+      return
+    }
+
+    async function fetchSlots() {
+      setSlotsLoading(true)
+      setSelectedTime("")
+      try {
+        const res = await fetch(`/api/availability/slots?date=${selectedDate}`)
+        if (res.ok) {
+          const data = await res.json()
+          setAvailableSlots(data.slots || [])
+          setIsSunday(data.isSunday || false)
+        } else {
+          setAvailableSlots([])
+        }
+      } catch {
+        setAvailableSlots([])
+      } finally {
+        setSlotsLoading(false)
+      }
+    }
+
+    fetchSlots()
+  }, [selectedDate])
 
   const allServices = Object.entries(PRICE_LIST).flatMap(([category, services]) =>
     services.map((s) => ({ ...s, category }))
@@ -230,21 +262,37 @@ export default function BookingPage() {
         </div>
 
         {selectedDate && (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"].map(
-              (time) => (
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
-                    selectedTime === time
-                      ? "border-accent bg-accent text-primary"
-                      : "border-border bg-card text-muted hover:border-accent/30"
-                  }`}
-                >
-                  {time}
-                </button>
-              )
+          <div>
+            {slotsLoading ? (
+              <p className="text-sm text-muted">Loading available slots...</p>
+            ) : availableSlots.length === 0 ? (
+              <p className="text-sm text-muted">No available slots on this date</p>
+            ) : (
+              <>
+                {isSunday && (
+                  <p className="mb-2 text-xs text-accent-dark">
+                    Sunday: only Cornrows and Crotchet available
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {availableSlots.map((slot) => (
+                    <button
+                      key={slot.time}
+                      onClick={() => slot.available && setSelectedTime(slot.time)}
+                      disabled={!slot.available}
+                      className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
+                        !slot.available
+                          ? "border-border bg-card/50 text-muted-light line-through cursor-not-allowed"
+                          : selectedTime === slot.time
+                            ? "border-accent bg-accent text-primary"
+                            : "border-border bg-card text-muted hover:border-accent/30"
+                      }`}
+                    >
+                      {slot.time}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}

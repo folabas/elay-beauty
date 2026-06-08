@@ -79,6 +79,33 @@ export function cancellationEmail(params: {
   }
 }
 
+export function rescheduleOfferEmail(params: {
+  name: string
+  bookingId: string
+  reason: string
+  alternativeDate: string
+  alternativeTime: string
+}) {
+  return {
+    subject: "Booking Cancelled – Alternative Time Offered – EL.AY Beauty",
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h1 style="color: #c9a84c;">Booking Cancelled – Alternative Offered</h1>
+        <p>Hi ${params.name},</p>
+        <p>Your booking #${params.bookingId} has been cancelled.</p>
+        <p style="color: #6b7280;">Reason: ${params.reason}</p>
+        <div style="background: #faf9f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0; font-weight: bold; color: #1a1a2e;">Suggested Alternative</p>
+          <p style="margin: 8px 0 0; color: #6b7280;">${params.alternativeDate} at ${params.alternativeTime}</p>
+          <p style="margin: 8px 0 0; color: #6b7280;">Please call or message to confirm this new time.</p>
+        </div>
+        <hr style="border: none; border-top: 1px solid #e5e7eb;" />
+        <p style="color: #6b7280; font-size: 12px;">EL.AY Beauty – London, UK</p>
+      </div>
+    `,
+  }
+}
+
 export function adminNotificationEmail(params: {
   clientName: string
   service: string

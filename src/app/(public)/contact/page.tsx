@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Building, CreditCard, Clock } from "lucide-react"
+import { Mail, Phone, MapPin, Building, CreditCard, Clock, MessageCircle } from "lucide-react"
 
 const paymentDetails = {
   bank: "Monzo",
@@ -41,10 +41,27 @@ export default function ContactPage() {
                 <div>
                   <p className="text-sm font-medium text-primary">Email</p>
                   <a
-                    href="mailto:elizabeth@elaybeauty.com"
+                    href="mailto:Iretomiwaelizabeth474@gmail.com"
                     className="text-sm text-muted transition-colors hover:text-accent"
                   >
-                    elizabeth@elaybeauty.com
+                    Iretomiwaelizabeth474@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-primary">WhatsApp</p>
+                  <a
+                    href="https://wa.link/wycx8l"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted transition-colors hover:text-accent"
+                  >
+                    Chat on WhatsApp
                   </a>
                 </div>
               </div>
@@ -129,6 +146,22 @@ export default function ContactPage() {
               After sending your deposit, your booking will be confirmed. Please
               use the reference Hair so we can identify your payment.
             </p>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-12 max-w-md text-center">
+          <h2 className="font-serif text-2xl font-bold text-primary">
+            Or Message on WhatsApp
+          </h2>
+          <p className="mt-2 text-sm text-muted">
+            Scan the QR code or click the link above to chat directly
+          </p>
+          <div className="mt-6 flex justify-center">
+            <img
+              src="/images/wa.link_wycx8l.png"
+              alt="WhatsApp QR Code"
+              className="h-48 w-48 rounded-lg border border-border shadow-soft"
+            />
           </div>
         </div>
       </div>

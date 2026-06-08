@@ -2,13 +2,18 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 const DAY_MAP: Record<string, number> = {
+  Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4,
   Friday: 5, Saturday: 6, Sunday: 0,
 }
 
 const DEFAULT_SCHEDULE = [
-  { day: "Friday", start: "17:00", end: "24:00" },
-  { day: "Saturday", start: "07:00", end: "12:00" },
-  { day: "Sunday", start: "15:00", end: "17:00" },
+  { day: "Monday", start: "09:00", end: "17:00", isActive: false },
+  { day: "Tuesday", start: "09:00", end: "17:00", isActive: false },
+  { day: "Wednesday", start: "09:00", end: "17:00", isActive: false },
+  { day: "Thursday", start: "09:00", end: "17:00", isActive: false },
+  { day: "Friday", start: "17:00", end: "24:00", isActive: true },
+  { day: "Saturday", start: "07:00", end: "12:00", isActive: true },
+  { day: "Sunday", start: "15:00", end: "17:00", isActive: true },
 ]
 
 async function ensureAvailability() {
@@ -21,7 +26,7 @@ async function ensureAvailability() {
           startTime: s.start,
           endTime: s.end,
           isRecurring: true,
-          isActive: true,
+          isActive: s.isActive,
         },
       })
     }
@@ -75,7 +80,7 @@ export async function GET(request: Request) {
 
     const isSunday = dayOfWeek === 0
 
-    const existingBookings = await prisma.booking.findMany({
+    const existingBooking = await prisma.booking.findFirst({
       where: {
         date: {
           gte: new Date(dateStr + "T00:00:00Z"),
@@ -83,17 +88,17 @@ export async function GET(request: Request) {
         },
         status: { not: "CANCELLED" },
       },
-      select: { time: true },
+      select: { id: true },
     })
 
-    const bookedTimes = new Set(existingBookings.map((b) => b.time))
+    const dayFull = existingBooking !== null
 
     const slotList = slots.map((time) => ({
       time,
-      available: !bookedTimes.has(time),
+      available: !dayFull,
     }))
 
-    return NextResponse.json({ slots: slotList, isSunday })
+    return NextResponse.json({ slots: slotList, isSunday, dayFull })
   } catch (error) {
     console.error("Failed to fetch slots:", error)
     return NextResponse.json({ error: "Failed to fetch slots" }, { status: 500 })

@@ -30,6 +30,7 @@ export default function BookingPage() {
   const [availableSlots, setAvailableSlots] = useState<{ time: string; available: boolean }[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [isSunday, setIsSunday] = useState(false)
+  const [dayFull, setDayFull] = useState(false)
 
   useEffect(() => {
     if (!selectedDate) {
@@ -38,15 +39,17 @@ export default function BookingPage() {
       return
     }
 
-    async function fetchSlots() {
+      async function fetchSlots() {
       setSlotsLoading(true)
       setSelectedTime("")
+      setDayFull(false)
       try {
         const res = await fetch(`/api/availability/slots?date=${selectedDate}`)
         if (res.ok) {
           const data = await res.json()
           setAvailableSlots(data.slots || [])
           setIsSunday(data.isSunday || false)
+          setDayFull(data.dayFull || false)
         } else {
           setAvailableSlots([])
         }
@@ -268,6 +271,8 @@ export default function BookingPage() {
           <div>
             {slotsLoading ? (
               <p className="text-sm text-muted">Loading available slots...</p>
+            ) : availableSlots.length === 0 && dayFull ? (
+              <p className="text-sm text-muted">This day is already booked. Please choose another date.</p>
             ) : availableSlots.length === 0 ? (
               <p className="text-sm text-muted">No available slots on this date</p>
             ) : (
@@ -605,6 +610,19 @@ export default function BookingPage() {
       {bookingId && (
         <p className="mt-4 text-xs text-muted">Booking reference: #{bookingId.slice(0, 8)}</p>
       )}
+
+      <div className="mt-6 rounded-lg border border-border bg-card p-4 text-center">
+        <p className="text-sm font-medium text-primary">Questions? Contact us</p>
+        <div className="mt-2 flex items-center justify-center gap-4 text-xs">
+          <a href="mailto:Iretomiwaelizabeth474@gmail.com" className="text-accent-dark hover:underline">
+            Iretomiwaelizabeth474@gmail.com
+          </a>
+          <span className="text-muted">|</span>
+          <a href="https://wa.link/wycx8l" target="_blank" rel="noopener noreferrer" className="text-accent-dark hover:underline">
+            WhatsApp
+          </a>
+        </div>
+      </div>
 
       <button
         onClick={() => {

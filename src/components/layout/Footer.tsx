@@ -44,6 +44,7 @@ export default function Footer() {
             <li>Friday: 5:00 PM – Next Morning</li>
             <li>Saturday: 7:00 AM – 12:00 PM</li>
             <li>Sunday: 3:00 PM – 5:00 PM</li>
+            <li className="text-white/50 text-xs pt-1">Mon–Thu: By arrangement</li>
           </ul>
         </div>
 
@@ -56,6 +57,24 @@ export default function Footer() {
             <li>Elizabeth Ayedebinu</li>
             <li>Sort Code: 04-00-03</li>
             <li>Account: 34563358</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
+            Contact
+          </h4>
+          <ul className="mt-4 space-y-2 text-sm text-white/70">
+            <li>
+              <a href="mailto:Iretomiwaelizabeth474@gmail.com" className="hover:text-white transition-colors">
+                Iretomiwaelizabeth474@gmail.com
+              </a>
+            </li>
+            <li>
+              <a href="https://wa.link/wycx8l" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                WhatsApp
+              </a>
+            </li>
           </ul>
         </div>
       </div>

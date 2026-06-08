@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       },
     })
 
-    const depositRequired = totalPrice > 30
+    const depositRequired = true
 
     const clientEmail = await sendEmail({
       to: email,

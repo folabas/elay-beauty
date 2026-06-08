@@ -67,7 +67,7 @@ export function bookingConfirmationEmail(params: {
         ${
           params.depositRequired
             ? `<p style="color: #c9a84c; font-weight: bold;">Please send the £20 deposit to Monzo (Elizabeth Ayedebinu, 04-00-03, 34563358, ref: Hair) to confirm your booking.</p>`
-            : ""
+            : `<p style="color: #16a34a; font-weight: bold;">Your deposit has been received. Thank you!</p>`
         }
         <hr style="border: none; border-top: 1px solid #e5e7eb;" />
         <p style="color: #6b7280; font-size: 12px;">EL.AY Beauty – London, UK</p>

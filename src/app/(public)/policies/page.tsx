@@ -5,9 +5,9 @@ const policies = [
     icon: DollarSign,
     title: "Deposit Policy",
     items: [
-      "For bookings over £30, a £20 deposit must be made to secure the booking.",
+      "A £20 deposit is required on all bookings to secure your appointment.",
       "Without a deposit, there is no booking.",
-      "Deposits can be paid via bank transfer to the provided account details.",
+      "Deposits can be paid via bank transfer to Monzo (Elizabeth Ayedebinu, 04-00-03, 34563358, ref: Hair).",
     ],
   },
   {
@@ -41,8 +41,9 @@ const policies = [
     icon: XCircle,
     title: "Cancellation Policy",
     items: [
-      "Notice must be given at least 72 hours before the appointment.",
-      "Cancellations made after this period will not receive a deposit refund.",
+      "Notice must be given at least 48 hours before the appointment.",
+      "Cancellations made less than 48 hours before the appointment will not receive a deposit refund.",
+      "Cancellations made 48 hours or more before the appointment will receive a full deposit refund.",
     ],
   },
   {

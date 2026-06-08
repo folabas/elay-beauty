@@ -80,7 +80,7 @@ export default function ContactPage() {
               Deposit Payment
             </h2>
             <p className="text-muted">
-              For bookings over £30, a £20 deposit is required. Send your
+              A £20 deposit is required on all bookings. Send your
               deposit to the account below:
             </p>
 

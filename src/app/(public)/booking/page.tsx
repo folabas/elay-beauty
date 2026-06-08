@@ -138,7 +138,7 @@ export default function BookingPage() {
   const finalPrice = formData.isStudent && ["BRAIDS", "NATURAL"].includes(selectedCategory)
     ? totalPrice * 0.8
     : totalPrice
-  const depositRequired = finalPrice > 30
+  const depositRequired = true
 
   const renderProgress = () => {
     const steps: { key: Step; label: string }[] = [
@@ -490,29 +490,23 @@ export default function BookingPage() {
 
           <div className="rounded-lg border border-border bg-card p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
-              {depositRequired ? "Deposit Required" : "No Deposit Required"}
+              Deposit Required
             </h3>
-            {depositRequired ? (
-              <div className="mt-2 space-y-2">
-                <p className="text-sm text-muted">
-                  A £20 deposit is required to secure your booking. Send to:
-                </p>
-                <div className="rounded-md bg-background p-3 text-sm">
-                  <p><span className="text-muted">Bank:</span> Monzo</p>
-                  <p><span className="text-muted">Name:</span> Elizabeth Ayedebinu</p>
-                  <p><span className="text-muted">Sort Code:</span> 04-00-03</p>
-                  <p><span className="text-muted">Account:</span> 34563358</p>
-                  <p><span className="text-muted">Reference:</span> Hair</p>
-                </div>
-                <p className="text-xs text-muted">
-                  Your booking will be confirmed once we receive the deposit.
-                </p>
-              </div>
-            ) : (
-              <p className="mt-1 text-sm text-muted">
-                No deposit needed for bookings under £30.
+            <div className="mt-2 space-y-2">
+              <p className="text-sm text-muted">
+                A £20 deposit is required to secure your booking. Send to:
               </p>
-            )}
+              <div className="rounded-md bg-background p-3 text-sm">
+                <p><span className="text-muted">Bank:</span> Monzo</p>
+                <p><span className="text-muted">Name:</span> Elizabeth Ayedebinu</p>
+                <p><span className="text-muted">Sort Code:</span> 04-00-03</p>
+                <p><span className="text-muted">Account:</span> 34563358</p>
+                <p><span className="text-muted">Reference:</span> Hair</p>
+              </div>
+              <p className="text-xs text-muted">
+                Your booking will be confirmed once we receive the deposit.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -570,7 +564,7 @@ export default function BookingPage() {
       </h2>
       <p className="mx-auto mt-4 max-w-md text-muted">
         Your booking has been received
-        {depositRequired ? ". Please send the £20 deposit to confirm." : "."}
+        . Please send the £20 deposit to confirm.
       </p>
 
       <div className="mx-auto mt-8 max-w-sm rounded-lg border border-border bg-card p-6 text-left">

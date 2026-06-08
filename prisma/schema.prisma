@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+enum Category {
+  BRAIDS
+  NATURAL
+  CHILDREN
+}
+
+enum BookingStatus {
+  PENDING_DEPOSIT
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String?
+  role      Role      @default(CLIENT)
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+}
+
+model Service {
+  id               String    @id @default(cuid())
+  name             String
+  category         Category
+  description      String?
+  price            Float
+  requiresHairInfo Boolean   @default(true)
+  duration         Int?
+  isActive         Boolean   @default(true)
+  bookings         Booking[]
+  createdAt        DateTime  @default(now())
+}
+
+model Availability {
+  id            String   @id @default(cuid())
+  dayOfWeek     Int?
+  specificDate  DateTime?
+  startTime     String
+  endTime       String
+  isRecurring   Boolean  @default(true)
+  isActive      Boolean  @default(true)
+  restrictedTo  Category[]
+  createdAt     DateTime @default(now())
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  client             User          @relation(fields: [clientId], references: [id])
+  clientId           String
+  service            Service       @relation(fields: [serviceId], references: [id])
+  serviceId          String
+  date               DateTime
+  time               String
+  status             BookingStatus @default(PENDING_DEPOSIT)
+  depositPaid        Boolean       @default(false)
+  totalPrice         Float
+  hairLength         String?
+  hairType           String?
+  notes              String?
+  cancellationReason String?
+  isStudent          Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+}
+
+model BlockedSlot {
+  id        String   @id @default(cuid())
+  date      DateTime
+  startTime String
+  endTime   String
+  reason    String?
+  createdAt DateTime @default(now())
+}

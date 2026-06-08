@@ -230,46 +230,48 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
           ) : (
             <div className="divide-y divide-border">
               {filtered.map((booking) => (
-                <div key={booking.id} className="bg-card p-4 transition-colors hover:bg-accent/5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                <div key={booking.id} className="bg-card px-4 py-4 transition-colors hover:bg-accent/5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</span>
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[booking.status]}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
-                          {booking.status}
-                        </span>
                       </div>
-                      <p className="mt-1.5 font-medium text-primary truncate">{booking.client}</p>
-                      <p className="text-xs text-muted truncate">{booking.service}</p>
-                      <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                      <div>
+                        <p className="font-medium text-primary truncate">{booking.client}</p>
+                        <p className="text-xs text-muted truncate">{booking.service}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted">
                         <span>{booking.date}</span>
                         <span>{booking.time}</span>
-                        <span className="font-medium text-primary">£{booking.price}</span>
+                        <span className="font-semibold text-primary">£{booking.price}</span>
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      {!booking.depositPaid && booking.status !== "Cancelled" && booking.status !== "Completed" && (
-                        <button
-                          onClick={() => handleMarkPaid(booking.id)}
-                          disabled={processing === booking.id}
-                          className="rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent-dark transition-all active:scale-95 disabled:opacity-50"
-                        >
-                          {processing === booking.id ? "..." : "Mark Paid"}
-                        </button>
-                      )}
+                    <div className="flex shrink-0 flex-col items-end gap-2.5">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${statusStyles[booking.status]}`}>
+                        <span className={`h-2 w-2 rounded-full ${statusDot[booking.status]}`} />
+                        {booking.status}
+                      </span>
                       <div className="flex items-center gap-2">
+                        {!booking.depositPaid && booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                          <button
+                            onClick={() => handleMarkPaid(booking.id)}
+                            disabled={processing === booking.id}
+                            className="rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent-dark transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            {processing === booking.id ? "..." : "Mark Paid"}
+                          </button>
+                        )}
                         {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                           <button
                             onClick={() => setCancelTarget(booking)}
-                            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 active:scale-95"
+                            className="rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 active:scale-95"
                           >
                             Cancel
                           </button>
                         )}
                         <button
                           onClick={() => setViewing(booking)}
-                          className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
+                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
                         >
                           View <ChevronRight className="h-3.5 w-3.5" />
                         </button>

@@ -24,7 +24,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       })
 
       const dateStr = booking.date.toISOString().split("T")[0]
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: booking.client.email,
         ...bookingConfirmationEmail({
           name: booking.client.name,
@@ -36,7 +36,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }),
       })
 
-      return NextResponse.json({ message: "Deposit confirmed" })
+      return NextResponse.json({
+        message: "Deposit confirmed",
+        emailWarning: emailResult.ok ? undefined : `Email failed: ${emailResult.error}`,
+      })
     }
 
     if (action === "cancel") {
@@ -50,9 +53,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       })
 
       const shortId = booking.id.slice(0, 8)
+      let emailResult: { ok: boolean; error?: string }
 
       if (alternative?.date && alternative?.time) {
-        await sendEmail({
+        emailResult = await sendEmail({
           to: booking.client.email,
           ...rescheduleOfferEmail({
             name: booking.client.name,
@@ -63,7 +67,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           }),
         })
       } else {
-        await sendEmail({
+        emailResult = await sendEmail({
           to: booking.client.email,
           ...cancellationEmail({
             name: booking.client.name,
@@ -73,7 +77,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         })
       }
 
-      return NextResponse.json({ message: "Booking cancelled" })
+      return NextResponse.json({
+        message: "Booking cancelled",
+        emailWarning: emailResult.ok ? undefined : `Email failed: ${emailResult.error}`,
+      })
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 })

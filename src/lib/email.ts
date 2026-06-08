@@ -8,10 +8,10 @@ interface SendBookingEmailParams {
   html: string
 }
 
-export async function sendEmail({ to, subject, html }: SendBookingEmailParams) {
+export async function sendEmail({ to, subject, html }: SendBookingEmailParams): Promise<{ ok: boolean; error?: string }> {
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "re_xxxxxxxxxxxx") {
     console.log(`[EMAIL] Would send to ${to}: ${subject}`)
-    return
+    return { ok: true }
   }
 
   try {
@@ -21,8 +21,12 @@ export async function sendEmail({ to, subject, html }: SendBookingEmailParams) {
       subject,
       html,
     })
+    console.log(`[EMAIL] Sent to ${to}: ${subject}`)
+    return { ok: true }
   } catch (error) {
-    console.error("Failed to send email:", error)
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error(`[EMAIL] Failed to send to ${to}: ${msg}`)
+    return { ok: false, error: msg }
   }
 }
 

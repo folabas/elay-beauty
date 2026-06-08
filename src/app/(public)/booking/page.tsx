@@ -25,6 +25,8 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [emailWarnings, setEmailWarnings] = useState<string[]>([])
+  const [agreedToPolicies, setAgreedToPolicies] = useState(false)
   const [availableSlots, setAvailableSlots] = useState<{ time: string; available: boolean }[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [isSunday, setIsSunday] = useState(false)
@@ -123,6 +125,7 @@ export default function BookingPage() {
       }
 
       setBookingId(data.id)
+      setEmailWarnings(data.emailWarnings || [])
       setStep("confirmation")
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Something went wrong")
@@ -513,11 +516,32 @@ export default function BookingPage() {
           </div>
         </div>
 
+        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-4">
+          <input
+            type="checkbox"
+            checked={agreedToPolicies}
+            onChange={(e) => setAgreedToPolicies(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+          />
+          <div>
+            <span className="text-sm font-medium text-primary">
+              I have read and agree to the booking policies
+            </span>
+            <p className="mt-0.5 text-xs text-muted">
+              Including deposit, late arrival, cancellation, and pricing policies.
+              View policies at{" "}
+              <a href="/policies" target="_blank" className="text-accent-dark underline">
+                elay-beauty.vercel.app/policies
+              </a>
+            </p>
+          </div>
+        </label>
+
         {submitError && (
           <p className="mt-4 text-sm text-red-500">{submitError}</p>
         )}
 
-        <div className="mt-8 flex justify-between">
+        <div className="mt-6 flex justify-between">
           <button
             onClick={() => setStep("details")}
             className="flex items-center gap-2 text-sm font-medium text-muted hover:text-primary"
@@ -526,7 +550,7 @@ export default function BookingPage() {
           </button>
           <button
             onClick={handleConfirm}
-            disabled={submitting}
+            disabled={submitting || !agreedToPolicies}
             className="flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-primary hover:bg-accent-light disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Confirm Booking"} <CheckCircle className="h-4 w-4" />
@@ -572,12 +596,21 @@ export default function BookingPage() {
         </div>
       </div>
 
+      {emailWarnings.length > 0 && (
+        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4 text-left">
+          <p className="text-sm font-medium text-red-700">Email Notice</p>
+          {emailWarnings.map((w, i) => (
+            <p key={i} className="mt-1 text-xs text-red-600">{w}</p>
+          ))}
+          <p className="mt-2 text-xs text-red-600">
+            Your booking is saved, but please contact us to confirm. See the Contact page for details.
+          </p>
+        </div>
+      )}
+
       {bookingId && (
         <p className="mt-4 text-xs text-muted">Booking reference: #{bookingId.slice(0, 8)}</p>
       )}
-      <p className="mt-4 text-sm text-muted">
-        A confirmation email has been sent to <strong>{formData.email}</strong>
-      </p>
 
       <button
         onClick={() => {
@@ -595,6 +628,7 @@ export default function BookingPage() {
             notes: "",
             isStudent: false,
           })
+          setEmailWarnings([])
         }}
         className="mt-8 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary-light"
       >

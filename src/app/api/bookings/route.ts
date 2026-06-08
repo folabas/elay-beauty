@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     const depositRequired = totalPrice > 30
 
-    await sendEmail({
+    const clientEmail = await sendEmail({
       to: email,
       ...bookingConfirmationEmail({
         name,
@@ -70,8 +70,9 @@ export async function POST(request: Request) {
       }),
     })
 
+    let adminEmailSent = false
     if (process.env.ADMIN_EMAIL) {
-      await sendEmail({
+      const result = await sendEmail({
         to: process.env.ADMIN_EMAIL,
         ...adminNotificationEmail({
           clientName: name,
@@ -80,12 +81,22 @@ export async function POST(request: Request) {
           time,
         }),
       })
+      adminEmailSent = result.ok
+    }
+
+    const emailWarnings: string[] = []
+    if (!clientEmail.ok) {
+      emailWarnings.push(`Confirmation email to you failed: ${clientEmail.error}`)
+    }
+    if (process.env.ADMIN_EMAIL && !adminEmailSent) {
+      emailWarnings.push("Admin notification email failed")
     }
 
     return NextResponse.json({
       id: booking.id,
       depositRequired,
       message: "Booking created successfully",
+      emailWarnings: emailWarnings.length > 0 ? emailWarnings : undefined,
     })
   } catch (error) {
     console.error("Booking creation failed:", error)

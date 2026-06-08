@@ -52,13 +52,15 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
         throw new Error(data.error || "Failed to cancel")
       }
 
+      const data = await res.json()
       setBookings(bookings.map((b) =>
         b.id === cancelTarget.id ? { ...b, status: "Cancelled" as const } : b
       ))
       const altMsg = alternative
         ? ` Alternative offered: ${alternative.date} at ${alternative.time}.`
         : ""
-      showToast(`Booking #${cancelTarget.id.slice(0, 8)} cancelled. Email sent to ${cancelTarget.email}.${altMsg}`)
+      const emailMsg = data.emailWarning ? ` ${data.emailWarning}` : ""
+      showToast(`Booking #${cancelTarget.id.slice(0, 8)} cancelled.${altMsg}${emailMsg}`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to cancel"}`)
     } finally {
@@ -82,10 +84,12 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
         throw new Error(data.error || "Failed to mark paid")
       }
 
+      const data = await res.json()
       setBookings(bookings.map((b) =>
         b.id === id ? { ...b, depositPaid: true, status: "Confirmed" as const } : b
       ))
-      showToast(`Booking #${id.slice(0, 8)} deposit confirmed. Confirmation email sent.`)
+      const emailMsg = data.emailWarning ? ` ${data.emailWarning}` : ""
+      showToast(`Booking #${id.slice(0, 8)} deposit confirmed.${emailMsg}`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to mark paid"}`)
     } finally {

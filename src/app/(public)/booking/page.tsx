@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { gsap } from "gsap"
+import { useGSAP } from "@gsap/react"
 import { PRICE_LIST, SERVICE_IMAGES, type BookingFormData } from "@/types"
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"

@@ -1,92 +1,135 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useRef } from "react"
+import { gsap } from "gsap"
+import { useGSAP } from "@gsap/react"
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
+import { InstagramIcon, TiktokIcon, Mail01Icon, WhatsappIcon } from "hugeicons-react"
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 export default function Footer() {
+  const pathname = usePathname()
+  const footerRef = useRef<HTMLDivElement>(null)
+  
+  useGSAP(() => {
+    if (!footerRef.current) return
+    
+    gsap.from(".footer-stagger", {
+      scrollTrigger: {
+        trigger: footerRef.current,
+        start: "top 80%",
+      },
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power3.out"
+    })
+  }, { scope: footerRef })
+
+  // Don't show complex footer on booking page to keep focus on flow
+  if (pathname === "/booking") {
+    return (
+      <footer className="py-6 text-center text-xs text-muted">
+        &copy; {new Date().getFullYear()} EL.AY Beauty
+      </footer>
+    )
+  }
+
   return (
-    <footer className="border-t border-border bg-primary text-white">
-      <div className="container-section grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <h3 className="font-serif text-lg font-semibold">
-            EL.AY<span className="text-accent">_</span>beauty
-          </h3>
-          <p className="mt-2 text-sm text-white/70">
-            Professional hair braiding and styling services.
-          </p>
-        </div>
+    <footer ref={footerRef} className="relative bg-primary text-white overflow-hidden pt-24 pb-8 rounded-t-[40px] mt-24">
+      {/* Taped effect overlay */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-white/10 backdrop-blur-sm rotate-2 shadow-lg z-10" />
+      
+      <div className="container-section relative z-20">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+          <div className="footer-stagger">
+            <h3 className="font-serif text-2xl font-bold mb-4">
+              EL.AY<span className="text-accent">_</span>beauty
+            </h3>
+            <p className="text-sm text-white/60 leading-relaxed max-w-xs">
+              Premium hair braiding and natural styling services crafted with precision and care.
+            </p>
+            <div className="flex gap-4 mt-6">
+              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-primary transition-all press-effect">
+                <InstagramIcon size={20} />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-primary transition-all press-effect">
+                <TiktokIcon size={20} />
+              </a>
+            </div>
+          </div>
 
-        <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
-            Quick Links
-          </h4>
-          <ul className="mt-4 space-y-2">
-            {[
-              { href: "/services", label: "Services & Pricing" },
-              { href: "/booking", label: "Book Appointment" },
-              { href: "/policies", label: "Policies" },
-              { href: "/contact", label: "Contact" },
-            ].map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-white/70 transition-colors hover:text-white"
-                >
-                  {link.label}
-                </Link>
+          <div className="footer-stagger">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-6">Quick Links</h4>
+            <ul className="space-y-4">
+              {[
+                { href: "/services", label: "Services & Pricing" },
+                { href: "/booking", label: "Book Appointment" },
+                { href: "/policies", label: "Policies" },
+                { href: "/contact", label: "Contact" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-white/60 hover:text-white hover:translate-x-1 inline-block transition-transform">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="footer-stagger">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-6">Hours</h4>
+            <ul className="space-y-4 text-sm text-white/60">
+              <li className="flex justify-between border-b border-white/10 pb-2">
+                <span>Friday</span> <span className="text-white">5pm – late</span>
               </li>
-            ))}
-          </ul>
+              <li className="flex justify-between border-b border-white/10 pb-2">
+                <span>Saturday</span> <span className="text-white">7am – 12pm</span>
+              </li>
+              <li className="flex justify-between border-b border-white/10 pb-2">
+                <span>Sunday</span> <span className="text-white">3pm – 5pm</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-stagger">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-6">Connect</h4>
+            <ul className="space-y-4">
+              <li>
+                <a href="mailto:Iretomiwaelizabeth474@gmail.com" className="group flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors">
+                  <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-accent group-hover:text-primary transition-colors">
+                    <Mail01Icon size={16} />
+                  </span>
+                  Email Us
+                </a>
+              </li>
+              <li>
+                <a href="https://wa.link/wycx8l" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-3 text-sm text-white/60 hover:text-white transition-colors">
+                  <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#25D366] group-hover:text-white transition-colors">
+                    <WhatsappIcon size={16} />
+                  </span>
+                  WhatsApp
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
-            Hours
-          </h4>
-          <ul className="mt-4 space-y-2 text-sm text-white/70">
-            <li>Friday: 5:00 PM – Next Morning</li>
-            <li>Saturday: 7:00 AM – 12:00 PM</li>
-            <li>Sunday: 3:00 PM – 5:00 PM</li>
-            <li className="text-white/50 text-xs pt-1">Mon–Thu: By arrangement</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
-            Payment
-          </h4>
-          <ul className="mt-4 space-y-2 text-sm text-white/70">
-            <li>Monzo Bank</li>
-            <li>Elizabeth Ayedebinu</li>
-            <li>Sort Code: 04-00-03</li>
-            <li>Account: 34563358</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wider text-accent">
-            Contact
-          </h4>
-          <ul className="mt-4 space-y-2 text-sm text-white/70">
-            <li>
-              <a href="mailto:Iretomiwaelizabeth474@gmail.com" className="hover:text-white transition-colors">
-                Iretomiwaelizabeth474@gmail.com
-              </a>
-            </li>
-            <li>
-              <a href="https://wa.link/wycx8l" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                WhatsApp
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t border-white/10 py-6">
-        <div className="container-section flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-xs text-white/50">
-            &copy; {new Date().getFullYear()} EL.AY Beauty. All rights reserved.
-          </p>
-          <p className="text-xs text-white/50">
-            Student discount: 20% off any braiding style
-          </p>
+        {/* Massive Brand Name */}
+        <div className="footer-stagger flex flex-col justify-center items-center w-full overflow-hidden relative -mt-4">
+          <h1 className="text-[34vw] font-serif font-black leading-none tracking-tighter text-white/5 select-none -mb-8">
+            EL.AY
+          </h1>
+          <div className="w-full flex flex-col sm:flex-row justify-between items-center text-xs text-white/40 mt-12 gap-2 relative z-10">
+            <span>&copy; {new Date().getFullYear()} EL.AY Beauty. All rights reserved.</span>
+            <span>Student discount: 20% off</span>
+          </div>
         </div>
       </div>
     </footer>

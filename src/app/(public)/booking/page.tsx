@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { gsap } from "gsap"
+import { useGSAP } from "@gsap/react"
 import { PRICE_LIST, type BookingFormData } from "@/types"
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
@@ -32,6 +34,16 @@ export default function BookingPage() {
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [isSunday, setIsSunday] = useState(false)
   const [dayFull, setDayFull] = useState(false)
+  const stepContainerRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    if (stepContainerRef.current) {
+      gsap.fromTo(stepContainerRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      )
+    }
+  }, [step])
 
   useEffect(() => {
     if (!selectedDate) {
@@ -166,7 +178,7 @@ export default function BookingPage() {
                 className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
                   i <= currentIndex
                     ? "bg-accent text-primary"
-                    : "border border-border text-muted"
+                    : "border border-primary/10 text-muted"
                 }`}
               >
                 {i + 1}
@@ -209,7 +221,7 @@ export default function BookingPage() {
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               selectedCategory === cat
                 ? "bg-accent text-primary"
-                : "border border-border bg-card text-muted hover:border-accent/30"
+                : "border border-primary/10 glass-card text-muted hover:border-accent/30"
             }`}
           >
             {cat === "" ? "All" : cat === "BRAIDS" ? "Braids" : cat === "NATURAL" ? "Natural" : "Children"}
@@ -222,10 +234,10 @@ export default function BookingPage() {
           <button
             key={service.name}
             onClick={() => handleSelectService(service.name, service.price)}
-            className={`flex items-center justify-between rounded-lg border p-4 text-left transition-all hover:border-accent/30 hover:shadow-card ${
+            className={`flex items-center justify-between rounded-xl border p-5 shadow-sm press-effect text-left transition-all hover:border-accent/30 hover:shadow-card ${
               selectedService?.name === service.name
                 ? "border-accent bg-accent/5"
-                : "border-border bg-card"
+                : "border-primary/10 glass-card"
             }`}
           >
             <span className="text-sm font-medium text-primary">{service.name}</span>
@@ -271,10 +283,10 @@ export default function BookingPage() {
                       disabled={!slot.available}
                       className={`rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                         !slot.available
-                          ? "border-border bg-card/50 text-muted-light line-through cursor-not-allowed"
+                          ? "border-primary/10 glass-card/50 text-muted-light line-through cursor-not-allowed"
                           : selectedTime === slot.time
                             ? "border-accent bg-accent text-primary"
-                            : "border-border bg-card text-muted hover:border-accent/30"
+                            : "border-primary/10 glass-card text-muted hover:border-accent/30"
                       }`}
                     >
                       {slot.time}
@@ -296,7 +308,7 @@ export default function BookingPage() {
         </button>
         <button
           onClick={handleDateTimeNext}
-          className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary-light"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 shadow-elevated press-effect text-sm font-medium text-white hover:bg-primary-light"
         >
           Continue <ArrowRight className="h-4 w-4" />
         </button>
@@ -316,7 +328,7 @@ export default function BookingPage() {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             placeholder="Jane Doe"
           />
           {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
@@ -328,7 +340,7 @@ export default function BookingPage() {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             placeholder="jane@example.com"
           />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
@@ -340,7 +352,7 @@ export default function BookingPage() {
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             placeholder="+44 7XXX XXXXXX"
           />
           {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone}</p>}
@@ -352,7 +364,7 @@ export default function BookingPage() {
             <select
               value={formData.hairLength}
               onChange={(e) => setFormData({ ...formData, hairLength: e.target.value })}
-              className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+              className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             >
               <option value="">Select...</option>
               <option value="short">Short</option>
@@ -366,7 +378,7 @@ export default function BookingPage() {
             <select
               value={formData.hairType}
               onChange={(e) => setFormData({ ...formData, hairType: e.target.value })}
-              className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+              className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             >
               <option value="">Select...</option>
               <option value="natural">Natural</option>
@@ -382,18 +394,18 @@ export default function BookingPage() {
           <textarea
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="mt-1 block w-full rounded-xl border border-primary/10 bg-white/50 backdrop-blur-sm px-4 py-3 text-sm text-primary focus:border-accent focus:ring-4 focus:ring-accent/10 focus:outline-none transition-all"
             rows={3}
             placeholder="Any special requests or information..."
           />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-card p-3">
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-primary/10 glass-card p-3">
           <input
             type="checkbox"
             checked={formData.isStudent}
             onChange={(e) => setFormData({ ...formData, isStudent: e.target.checked })}
-            className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+            className="h-4 w-4 rounded border-primary/10 text-accent focus:ring-accent"
           />
           <div>
             <span className="text-sm font-medium text-primary">I am a student</span>
@@ -411,7 +423,7 @@ export default function BookingPage() {
         </button>
         <button
           onClick={handleDetailsNext}
-          className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary-light"
+          className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 shadow-elevated press-effect text-sm font-medium text-white hover:bg-primary-light"
         >
           Continue <ArrowRight className="h-4 w-4" />
         </button>
@@ -433,7 +445,7 @@ export default function BookingPage() {
         <p className="mt-2 text-muted">Review your booking details</p>
 
         <div className="mt-6 space-y-4">
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-primary/10 glass-card p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">Service</h3>
             <p className="mt-1 text-primary">{selectedService?.name}</p>
             <p className="mt-1 text-sm text-muted">
@@ -441,7 +453,7 @@ export default function BookingPage() {
             </p>
           </div>
 
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-primary/10 glass-card p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">Personal Info</h3>
             <div className="mt-2 space-y-1 text-sm">
               <p><span className="text-muted">Name:</span> {formData.name}</p>
@@ -463,7 +475,7 @@ export default function BookingPage() {
                   </span>
                 </div>
               ))}
-              <div className="border-t border-border pt-2">
+              <div className="border-t border-primary/10 pt-2">
                 <div className="flex justify-between">
                   <span className="font-semibold text-primary">Total</span>
                   <span className="font-serif text-xl font-bold text-accent-dark">
@@ -474,7 +486,7 @@ export default function BookingPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-primary/10 glass-card p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
               Deposit Required
             </h3>
@@ -482,7 +494,7 @@ export default function BookingPage() {
               <p className="text-sm text-muted">
                 A £20 deposit is required to secure your booking. Send to:
               </p>
-              <div className="rounded-md bg-background p-3 text-sm">
+              <div className="rounded-md glass-card p-3 text-sm">
                 <p><span className="text-muted">Bank:</span> Monzo</p>
                 <p><span className="text-muted">Name:</span> Elizabeth Ayedebinu</p>
                 <p><span className="text-muted">Sort Code:</span> 04-00-03</p>
@@ -496,12 +508,12 @@ export default function BookingPage() {
           </div>
         </div>
 
-        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-4">
+        <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-lg border border-primary/10 glass-card p-4">
           <input
             type="checkbox"
             checked={agreedToPolicies}
             onChange={(e) => setAgreedToPolicies(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+            className="mt-0.5 h-4 w-4 rounded border-primary/10 text-accent focus:ring-accent"
           />
           <div>
             <span className="text-sm font-medium text-primary">
@@ -531,7 +543,7 @@ export default function BookingPage() {
           <button
             onClick={handleConfirm}
             disabled={submitting || !agreedToPolicies}
-            className="flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-primary hover:bg-accent-light disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-accent px-6 py-3 shadow-elevated press-effect text-sm font-semibold text-primary hover:bg-accent-light disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Confirm Booking"} <CheckCircle className="h-4 w-4" />
           </button>
@@ -553,7 +565,7 @@ export default function BookingPage() {
         . Please send the £20 deposit to confirm.
       </p>
 
-      <div className="mx-auto mt-8 max-w-sm rounded-lg border border-border bg-card p-6 text-left">
+      <div className="mx-auto mt-8 max-w-sm rounded-lg border border-primary/10 glass-card p-6 text-left">
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Service</span>
@@ -623,7 +635,7 @@ export default function BookingPage() {
         <p className="mt-4 text-xs text-muted">Booking reference: #{bookingId.slice(0, 8)}</p>
       )}
 
-      <div className="mt-6 rounded-lg border border-border bg-card p-4 text-center">
+      <div className="mt-6 rounded-lg border border-primary/10 glass-card p-4 text-center">
         <p className="text-sm font-medium text-primary">Questions? Contact us</p>
         <div className="mt-2 flex items-center justify-center gap-4 text-xs">
           <a href="mailto:Iretomiwaelizabeth474@gmail.com" className="text-accent-dark hover:underline">
@@ -654,7 +666,7 @@ export default function BookingPage() {
           })
           setEmailWarnings([])
         }}
-        className="mt-8 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary-light"
+        className="mt-8 rounded-xl bg-primary px-6 py-3 shadow-elevated press-effect text-sm font-medium text-white hover:bg-primary-light"
       >
         Book Another Appointment
       </button>
@@ -662,29 +674,33 @@ export default function BookingPage() {
   )
 
   return (
-    <>
-      <section className="border-b border-border bg-card py-12">
+    <div className="relative min-h-[90vh] bg-background pb-20">
+      <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
+      
+      <section className="border-b border-primary/10 bg-white/40 backdrop-blur-md py-12 relative z-10 pt-32">
         <div className="container-section text-center">
           <h1 className="font-serif text-4xl font-bold tracking-tight text-primary sm:text-5xl">
             Book an Appointment
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted">
+          <p className="mx-auto mt-4 max-w-xl text-primary/70">
             Complete the steps below to book your hairstyle
           </p>
         </div>
       </section>
 
-      <div className="container-section py-12">
-        <div className="mx-auto max-w-2xl">
+      <div className="container-section py-12 relative z-10">
+        <div className="mx-auto max-w-2xl glass-card p-6 sm:p-10">
           {step !== "confirmation" && renderProgress()}
 
-          {step === "service" && renderServiceStep()}
-          {step === "datetime" && renderDateTimeStep()}
-          {step === "details" && renderDetailsStep()}
-          {step === "payment" && renderPaymentStep()}
-          {step === "confirmation" && renderConfirmationStep()}
+          <div ref={stepContainerRef}>
+            {step === "service" && renderServiceStep()}
+            {step === "datetime" && renderDateTimeStep()}
+            {step === "details" && renderDetailsStep()}
+            {step === "payment" && renderPaymentStep()}
+            {step === "confirmation" && renderConfirmationStep()}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

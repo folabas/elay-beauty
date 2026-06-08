@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect } from "react"
+import { motion } from "framer-motion"
 import { X } from "lucide-react"
 
 interface BookingDetails {
@@ -32,31 +34,50 @@ const statusStyles: Record<string, string> = {
 }
 
 export default function BookingDetailsDialog({ booking, onClose }: BookingDetailsDialogProps) {
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+    document.addEventListener("keydown", handleEsc)
+    return () => document.removeEventListener("keydown", handleEsc)
+  }, [onClose])
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div
-        className="mx-4 w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ duration: 0.2 }}
+        className="w-full max-w-lg rounded-xl bg-card p-6 shadow-elevated"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg font-bold text-primary">Booking Details</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-muted hover:bg-border hover:text-primary">
+          <button onClick={onClose} className="rounded-lg p-2 text-muted transition-colors hover:bg-border hover:text-primary active:scale-95">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="mt-5 space-y-4">
           <div className="rounded-lg bg-background p-4">
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            <div className="grid grid-cols-1 gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
               <div>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Booking ID</span>
-                <p className="mt-0.5 font-mono text-xs text-primary">{booking.id}</p>
+                <p className="mt-0.5 font-mono text-xs text-primary break-all">{booking.id}</p>
               </div>
               <div>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Status</span>
                 <p className="mt-0.5">
                   <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                       statusStyles[booking.status] || "bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -64,10 +85,10 @@ export default function BookingDetailsDialog({ booking, onClose }: BookingDetail
                   </span>
                 </p>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Client</span>
                 <p className="mt-0.5 font-medium text-primary">{booking.client}</p>
-                <p className="text-xs text-muted">{booking.email}</p>
+                <p className="text-xs text-muted break-all">{booking.email}</p>
               </div>
               <div>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Service</span>
@@ -128,12 +149,12 @@ export default function BookingDetailsDialog({ booking, onClose }: BookingDetail
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted hover:bg-background"
+            className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-background active:scale-95"
           >
             Close
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

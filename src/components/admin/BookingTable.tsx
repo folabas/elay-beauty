@@ -1,8 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import CancelBookingDialog from "./CancelBookingDialog"
 import BookingDetailsDialog from "./BookingDetailsDialog"
+import { CheckCircle, XCircle, Eye, CreditCard, ChevronRight } from "lucide-react"
 
 interface BookingRow {
   id: string
@@ -28,20 +30,38 @@ const statusStyles: Record<string, string> = {
   Cancelled: "bg-red-100 text-red-700",
 }
 
+const statusDot: Record<string, string> = {
+  Confirmed: "bg-green-500",
+  Pending: "bg-yellow-500",
+  Completed: "bg-blue-500",
+  Cancelled: "bg-red-500",
+}
+
 export default function BookingTable({ bookings: initial }: { bookings: BookingRow[] }) {
   const [bookings, setBookings] = useState(initial)
   const [cancelTarget, setCancelTarget] = useState<BookingRow | null>(null)
   const [viewing, setViewing] = useState<BookingRow | null>(null)
   const [filter, setFilter] = useState<string>("all")
   const [processing, setProcessing] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   const filtered = filter === "all" ? bookings : bookings.filter((b) => b.status.toLowerCase() === filter)
-  const [toast, setToast] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
     setTimeout(() => setToast(null), 5000)
   }
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setCancelTarget(null)
+        setViewing(null)
+      }
+    }
+    document.addEventListener("keydown", handleEsc)
+    return () => document.removeEventListener("keydown", handleEsc)
+  }, [])
 
   const handleCancel = async (reason: string, alternative?: { date: string; time: string }) => {
     if (!cancelTarget) return
@@ -106,26 +126,24 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
-                filter === f
-                  ? "bg-accent text-primary"
-                  : "border border-border text-muted hover:border-accent/30"
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+      <div className="flex flex-wrap gap-2">
+        {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition-all duration-200 active:scale-95 ${
+              filter === f
+                ? "bg-accent text-primary shadow-sm"
+                : "border border-border text-muted hover:border-accent/30 hover:text-primary"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full min-w-[700px]">
+        <table className="hidden min-w-[700px] md:table w-full">
           <thead>
             <tr className="bg-card text-left text-sm font-medium text-muted">
               <th className="px-4 py-3">ID</th>
@@ -148,7 +166,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
               </tr>
             ) : (
               filtered.map((booking) => (
-                <tr key={booking.id} className="bg-card text-sm">
+                <tr key={booking.id} className="bg-card text-sm transition-colors hover:bg-accent/5">
                   <td className="px-4 py-3 font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-primary">{booking.client}</p>
@@ -160,23 +178,22 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                   <td className="px-4 py-3 font-medium text-primary">£{booking.price}</td>
                   <td className="px-4 py-3">
                     {booking.depositPaid ? (
-                      <span className="text-xs font-medium text-green-600">Paid</span>
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+                        <CheckCircle className="h-3 w-3" /> Paid
+                      </span>
                     ) : (
                       <button
                         onClick={() => handleMarkPaid(booking.id)}
                         disabled={processing === booking.id}
-                        className="text-xs font-medium text-accent-dark hover:text-accent disabled:opacity-50"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-accent-dark transition-colors hover:text-accent disabled:opacity-50"
                       >
-                        {processing === booking.id ? "..." : "Mark Paid"}
+                        {processing === booking.id ? "..." : <><CreditCard className="h-3 w-3" /> Mark Paid</>}
                       </button>
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                        statusStyles[booking.status]
-                      }`}
-                    >
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[booking.status]}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
                       {booking.status}
                     </span>
                   </td>
@@ -186,16 +203,16 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                         <button
                           onClick={() => setCancelTarget(booking)}
                           disabled={processing === booking.id}
-                          className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                         >
-                          {processing === booking.id ? "..." : "Cancel"}
+                          {processing === booking.id ? "..." : <><XCircle className="h-3 w-3" /> Cancel</>}
                         </button>
                       )}
                       <button
                         onClick={() => setViewing(booking)}
-                        className="text-xs font-medium text-accent-dark hover:text-accent"
+                        className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 hover:text-accent"
                       >
-                        View
+                        <Eye className="h-3 w-3" /> View
                       </button>
                     </div>
                   </td>
@@ -204,29 +221,101 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
             )}
           </tbody>
         </table>
+
+        <div className="block md:hidden">
+          {filtered.length === 0 ? (
+            <div className="bg-card py-12 text-center text-sm text-muted">
+              No bookings found
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {filtered.map((booking) => (
+                <div key={booking.id} className="bg-card p-4 transition-colors hover:bg-accent/5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</span>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${statusStyles[booking.status]}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
+                          {booking.status}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 font-medium text-primary truncate">{booking.client}</p>
+                      <p className="text-xs text-muted truncate">{booking.service}</p>
+                      <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                        <span>{booking.date}</span>
+                        <span>{booking.time}</span>
+                        <span className="font-medium text-primary">£{booking.price}</span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      {!booking.depositPaid && booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                        <button
+                          onClick={() => handleMarkPaid(booking.id)}
+                          disabled={processing === booking.id}
+                          className="rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent-dark transition-all active:scale-95 disabled:opacity-50"
+                        >
+                          {processing === booking.id ? "..." : "Mark Paid"}
+                        </button>
+                      )}
+                      <div className="flex items-center gap-2">
+                        {booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                          <button
+                            onClick={() => setCancelTarget(booking)}
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 active:scale-95"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setViewing(booking)}
+                          className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
+                        >
+                          View <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {cancelTarget && (
-        <CancelBookingDialog
-          bookingId={cancelTarget.id}
-          clientName={cancelTarget.client}
-          onCancel={handleCancel}
-          onClose={() => setCancelTarget(null)}
-        />
-      )}
+      <AnimatePresence>
+        {cancelTarget && (
+          <CancelBookingDialog
+            bookingId={cancelTarget.id}
+            clientName={cancelTarget.client}
+            onCancel={handleCancel}
+            onClose={() => setCancelTarget(null)}
+          />
+        )}
+      </AnimatePresence>
 
-      {viewing && (
-        <BookingDetailsDialog
-          booking={viewing}
-          onClose={() => setViewing(null)}
-        />
-      )}
+      <AnimatePresence>
+        {viewing && (
+          <BookingDetailsDialog
+            booking={viewing}
+            onClose={() => setViewing(null)}
+          />
+        )}
+      </AnimatePresence>
 
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-white shadow-elevated">
-          {toast}
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm rounded-lg bg-primary px-4 py-3 text-center text-sm text-white shadow-elevated md:left-auto md:right-4 md:max-w-md md:text-left"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

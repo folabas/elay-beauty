@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-border">
+        <div className="mt-4 overflow-x-auto rounded-xl border border-border">
           {recentBookings.length === 0 ? (
             <div className="bg-card py-12 text-center">
               <p className="text-sm text-muted">No bookings yet</p>

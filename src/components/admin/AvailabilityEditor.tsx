@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface DaySchedule {
   id: string
@@ -111,7 +112,10 @@ export default function AvailabilityEditor() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-sm text-muted">Loading availability...</p>
+        <div className="flex items-center gap-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+          <p className="text-sm text-muted">Loading availability...</p>
+        </div>
       </div>
     )
   }
@@ -130,7 +134,7 @@ export default function AvailabilityEditor() {
           {schedule.map((day) => (
             <div
               key={day.id}
-              className={`flex items-center justify-between rounded-lg border p-4 ${
+              className={`flex items-center justify-between rounded-lg border p-4 transition-all duration-200 ${
                 day.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
               }`}
             >
@@ -138,12 +142,12 @@ export default function AvailabilityEditor() {
                 <button
                   onClick={() => toggleDay(day.id, day.isActive)}
                   disabled={toggling === day.id}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 ${
                     day.isActive ? "bg-accent" : "bg-border"
                   }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
                       day.isActive ? "translate-x-6" : "translate-x-1"
                     }`}
                   />
@@ -172,14 +176,14 @@ export default function AvailabilityEditor() {
           Add dates when you are unavailable (holidays, personal days)
         </p>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <input
             type="date"
             value={newBlocked.date}
             onChange={(e) =>
               setNewBlocked({ ...newBlocked, date: e.target.value })
             }
-            className="block rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="block w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none sm:w-auto"
           />
           <input
             type="text"
@@ -188,12 +192,12 @@ export default function AvailabilityEditor() {
               setNewBlocked({ ...newBlocked, reason: e.target.value })
             }
             placeholder="Reason (optional)"
-            className="block flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+            className="block w-full flex-1 rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
           />
           <button
             onClick={addBlockedDate}
             disabled={adding || !newBlocked.date}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-light disabled:opacity-50"
+            className="w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto"
           >
             {adding ? "..." : "Add"}
           </button>
@@ -204,7 +208,7 @@ export default function AvailabilityEditor() {
             {blockedDates.map((blocked) => (
               <div
                 key={blocked.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
+                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/5"
               >
                 <div>
                   <p className="text-sm font-medium text-primary">{blocked.date}</p>
@@ -214,7 +218,7 @@ export default function AvailabilityEditor() {
                 </div>
                 <button
                   onClick={() => removeBlockedDate(blocked.id)}
-                  className="text-xs font-medium text-red-500 hover:text-red-700"
+                  className="rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-700 active:scale-95"
                 >
                   Remove
                 </button>
@@ -223,16 +227,24 @@ export default function AvailabilityEditor() {
           </div>
         )}
 
-        {blockedDates.length === 0 && (
+        {blockedDates.length === 0 && !loading && (
           <p className="mt-4 text-sm text-muted">No blocked dates</p>
         )}
       </div>
 
-      {toast && (
-        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-white shadow-elevated">
-          {toast}
-        </div>
-      )}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm rounded-lg bg-primary px-4 py-3 text-center text-sm text-white shadow-elevated md:left-auto md:right-4 md:max-w-md md:text-left"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -27,11 +27,19 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false)
+    }
+    document.addEventListener("keydown", handleEsc)
+    return () => document.removeEventListener("keydown", handleEsc)
+  }, [])
+
   return (
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-4 z-50 rounded-lg border border-border bg-card p-2 text-muted shadow-soft lg:hidden"
+        className="fixed left-4 top-4 z-50 rounded-lg border border-border bg-card p-3 text-muted shadow-soft transition-all duration-200 hover:bg-accent/5 hover:text-primary active:scale-95 lg:hidden"
         aria-label="Toggle sidebar"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -39,7 +47,7 @@ export default function AdminSidebar() {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-border bg-card transition-transform duration-300 ease-out lg:static lg:w-64 lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -47,7 +55,7 @@ export default function AdminSidebar() {
           <Link href="/admin" className="font-serif text-xl font-bold tracking-tight text-primary">
             EL.AY<span className="text-accent">_</span>beauty
           </Link>
-          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent-dark">
+          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-accent-dark">
             Admin
           </span>
         </div>
@@ -62,13 +70,13 @@ export default function AdminSidebar() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.98]",
                   isActive
                     ? "bg-accent/10 text-accent-dark"
                     : "text-muted hover:bg-accent/5 hover:text-primary"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 {item.label}
               </Link>
             )
@@ -79,27 +87,32 @@ export default function AdminSidebar() {
           <Link
             href="/"
             target="_blank"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-accent/5 hover:text-primary"
+            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-muted transition-all duration-200 hover:bg-accent/5 hover:text-primary active:scale-[0.98]"
           >
-            <ExternalLink className="h-4 w-4" />
+            <ExternalLink className="h-5 w-5" />
             View Site
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-50 active:scale-[0.98]"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-5 w-5" />
             Sign Out
           </button>
         </div>
       </aside>
 
-      {isOpen && (
+      <div
+        className={cn(
+          "fixed inset-0 z-30 transition-all duration-300 lg:hidden",
+          isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        )}
+      >
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="absolute inset-0 bg-primary/40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
-      )}
+      </div>
     </>
   )
 }

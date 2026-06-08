@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { PRICE_LIST, SERVICE_IMAGES, type BookingFormData } from "@/types"
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"

@@ -1,4 +1,4 @@
-import { PRICE_LIST, SERVICE_CATEGORIES } from "@/types"
+import { PRICE_LIST, SERVICE_CATEGORIES, SERVICE_IMAGES } from "@/types"
 import { Sparkles, Heart, Baby, GraduationCap } from "lucide-react"
 
 const categoryIcons = {
@@ -22,11 +22,21 @@ function PriceCard({
   price: number
   note?: string
 }) {
+  const imgSrc = SERVICE_IMAGES[name]
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4 shadow-soft transition-all hover:border-accent/30 hover:shadow-card">
-      <div>
-        <p className="font-medium text-primary">{name}</p>
-        {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
+    <div className="group flex items-center justify-between rounded-lg border border-border bg-card p-4 shadow-soft transition-all hover:border-accent/30 hover:shadow-card">
+      <div className="flex items-center gap-4">
+        {imgSrc && (
+          <img
+            src={imgSrc}
+            alt={name}
+            className="h-16 w-16 shrink-0 rounded-lg object-cover"
+          />
+        )}
+        <div>
+          <p className="font-medium text-primary">{name}</p>
+          {note && <p className="mt-0.5 text-xs text-muted">{note}</p>}
+        </div>
       </div>
       <span className="whitespace-nowrap font-serif text-lg font-bold text-accent-dark">
         £{price}

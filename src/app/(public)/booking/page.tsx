@@ -89,7 +89,11 @@ export default function BookingPage() {
   const handleDetailsNext = () => {
     const newErrors: Record<string, string> = {}
     if (!formData.name.trim()) newErrors.name = "Name is required"
-    if (!formData.email.trim()) newErrors.email = "Email is required"
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address"
+    }
     if (!formData.phone.trim()) newErrors.phone = "Phone is required"
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)

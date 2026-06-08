@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     const date = new Date(dateStr + "T00:00:00Z")
     const dayOfWeek = date.getUTCDay()
 
-    const blocked = await prisma.blockedSlot.findFirst({
+    const blockedSlots = await prisma.blockedSlot.findMany({
       where: {
         date: {
           gte: new Date(dateStr + "T00:00:00Z"),
@@ -61,10 +61,6 @@ export async function GET(request: Request) {
         },
       },
     })
-
-    if (blocked) {
-      return NextResponse.json({ slots: [], message: "This date is unavailable" })
-    }
 
     const availability = await prisma.availability.findFirst({
       where: { dayOfWeek, isRecurring: true, isActive: true },
@@ -74,14 +70,29 @@ export async function GET(request: Request) {
       return NextResponse.json({ slots: [], message: "No availability for this day" })
     }
 
-    const slots: string[] = []
+    const allSlots: string[] = []
     const [startH, startM] = availability.startTime.split(":").map(Number)
     const [endH, endM] = availability.endTime.split(":").map(Number)
 
     let hour = startH
     while (hour < endH || (hour === endH && 0 < endM)) {
-      slots.push(`${String(hour).padStart(2, "0")}:00`)
+      allSlots.push(`${String(hour).padStart(2, "0")}:00`)
       hour++
+    }
+
+    function isBlocked(time: string): boolean {
+      const [checkH, checkM] = time.split(":").map(Number)
+      const checkMinutes = checkH * 60 + checkM
+      for (const blocked of blockedSlots) {
+        const [bStartH, bStartM] = blocked.startTime.split(":").map(Number)
+        const [bEndH, bEndM] = blocked.endTime.split(":").map(Number)
+        const startMinutes = bStartH * 60 + bStartM
+        const endMinutes = bEndH * 60 + bEndM
+        if (checkMinutes >= startMinutes && checkMinutes < endMinutes) {
+          return true
+        }
+      }
+      return false
     }
 
     const isSunday = dayOfWeek === 0
@@ -99,12 +110,14 @@ export async function GET(request: Request) {
 
     const dayFull = existingBooking !== null
 
-    const slotList = slots.map((time) => ({
+    const slotList = allSlots.map((time) => ({
       time,
-      available: !dayFull,
+      available: !dayFull && !isBlocked(time),
     }))
 
-    return NextResponse.json({ slots: slotList, isSunday, dayFull })
+    const fullyBlocked = blockedSlots.length > 0 && allSlots.every((s) => isBlocked(s))
+
+    return NextResponse.json({ slots: slotList, isSunday, dayFull, fullyBlocked })
   } catch (error) {
     console.error("Failed to fetch slots:", error)
     return NextResponse.json({ error: "Failed to fetch slots" }, { status: 500 })

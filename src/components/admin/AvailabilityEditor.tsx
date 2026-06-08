@@ -14,13 +14,22 @@ interface DaySchedule {
 interface BlockedDate {
   id: string
   date: string
+  startTime: string
+  endTime: string
   reason: string | null
 }
+
+const TIME_OPTIONS = [
+  "00:00", "01:00", "02:00", "03:00", "04:00", "05:00",
+  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
+  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
+  "18:00", "19:00", "20:00", "21:00", "22:00", "23:00",
+]
 
 export default function AvailabilityEditor() {
   const [schedule, setSchedule] = useState<DaySchedule[]>([])
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([])
-  const [newBlocked, setNewBlocked] = useState({ date: "", reason: "" })
+  const [newBlocked, setNewBlocked] = useState({ date: "", startTime: "09:00", endTime: "17:00", reason: "" })
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
@@ -84,7 +93,7 @@ export default function AvailabilityEditor() {
       if (res.ok) {
         const created = await res.json()
         setBlockedDates([...blockedDates, created])
-        setNewBlocked({ date: "", reason: "" })
+        setNewBlocked({ date: "", startTime: "09:00", endTime: "17:00", reason: "" })
         showToast("Date blocked")
       } else {
         showToast("Failed to add blocked date")
@@ -176,31 +185,64 @@ export default function AvailabilityEditor() {
           Add dates when you are unavailable (holidays, personal days)
         </p>
 
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="date"
-            value={newBlocked.date}
-            onChange={(e) =>
-              setNewBlocked({ ...newBlocked, date: e.target.value })
-            }
-            className="block w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none sm:w-auto"
-          />
+        <div className="mt-4 space-y-3 rounded-lg border border-border bg-card p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-muted">Date</label>
+              <input
+                type="date"
+                value={newBlocked.date}
+                onChange={(e) =>
+                  setNewBlocked({ ...newBlocked, date: e.target.value })
+                }
+                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-muted">From</label>
+              <select
+                value={newBlocked.startTime}
+                onChange={(e) =>
+                  setNewBlocked({ ...newBlocked, startTime: e.target.value })
+                }
+                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+              >
+                {TIME_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="mb-1 block text-xs font-medium text-muted">To</label>
+              <select
+                value={newBlocked.endTime}
+                onChange={(e) =>
+                  setNewBlocked({ ...newBlocked, endTime: e.target.value })
+                }
+                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+              >
+                {TIME_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={addBlockedDate}
+              disabled={adding || !newBlocked.date}
+              className="w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end"
+            >
+              {adding ? "..." : "Add"}
+            </button>
+          </div>
           <input
             type="text"
             value={newBlocked.reason}
             onChange={(e) =>
               setNewBlocked({ ...newBlocked, reason: e.target.value })
             }
-            placeholder="Reason (optional)"
-            className="block w-full flex-1 rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+            placeholder="Reason (optional) – e.g. Holiday, Appointment"
+            className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
           />
-          <button
-            onClick={addBlockedDate}
-            disabled={adding || !newBlocked.date}
-            className="w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto"
-          >
-            {adding ? "..." : "Add"}
-          </button>
         </div>
 
         {blockedDates.length > 0 && (
@@ -210,15 +252,16 @@ export default function AvailabilityEditor() {
                 key={blocked.id}
                 className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/5"
               >
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-primary">{blocked.date}</p>
-                  {blocked.reason && (
-                    <p className="text-xs text-muted">{blocked.reason}</p>
-                  )}
+                  <p className="text-xs text-muted">
+                    {blocked.startTime} – {blocked.endTime}
+                    {blocked.reason && <span> &middot; {blocked.reason}</span>}
+                  </p>
                 </div>
                 <button
                   onClick={() => removeBlockedDate(blocked.id)}
-                  className="rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-700 active:scale-95"
+                  className="shrink-0 rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-700 active:scale-95"
                 >
                   Remove
                 </button>

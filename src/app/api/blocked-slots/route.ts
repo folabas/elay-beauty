@@ -10,6 +10,8 @@ export async function GET() {
     const mapped = slots.map((s) => ({
       id: s.id,
       date: s.date.toISOString().split("T")[0],
+      startTime: s.startTime,
+      endTime: s.endTime,
       reason: s.reason,
     }))
 
@@ -23,7 +25,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { date, reason } = body
+    const { date, startTime, endTime, reason } = body
 
     if (!date) {
       return NextResponse.json({ error: "Date is required" }, { status: 400 })
@@ -32,13 +34,19 @@ export async function POST(request: Request) {
     const slot = await prisma.blockedSlot.create({
       data: {
         date: new Date(date),
+        startTime: startTime || "00:00",
+        endTime: endTime || "23:59",
         reason: reason || null,
-        startTime: "00:00",
-        endTime: "23:59",
       },
     })
 
-    return NextResponse.json({ id: slot.id, date: slot.date.toISOString().split("T")[0], reason: slot.reason })
+    return NextResponse.json({
+      id: slot.id,
+      date: slot.date.toISOString().split("T")[0],
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      reason: slot.reason,
+    })
   } catch (error) {
     console.error("Failed to create blocked slot:", error)
     return NextResponse.json({ error: "Failed to create blocked slot" }, { status: 500 })

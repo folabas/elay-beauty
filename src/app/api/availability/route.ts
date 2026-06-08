@@ -23,16 +23,18 @@ const DEFAULT_SCHEDULE = [
 
 export async function GET() {
   try {
-    let schedule = await prisma.availability.findMany({
+    const existingDays = await prisma.availability.findMany({
       where: { isRecurring: true },
-      orderBy: { dayOfWeek: "asc" },
+      select: { dayOfWeek: true },
     })
+    const existingDaySet = new Set(existingDays.map((d) => d.dayOfWeek))
 
-    if (schedule.length === 0) {
-      for (const s of DEFAULT_SCHEDULE) {
+    for (const s of DEFAULT_SCHEDULE) {
+      const dow = DAY_MAP[s.day]
+      if (!existingDaySet.has(dow)) {
         await prisma.availability.create({
           data: {
-            dayOfWeek: DAY_MAP[s.day],
+            dayOfWeek: dow,
             startTime: s.start,
             endTime: s.end,
             isRecurring: true,
@@ -40,11 +42,12 @@ export async function GET() {
           },
         })
       }
-      schedule = await prisma.availability.findMany({
-        where: { isRecurring: true },
-        orderBy: { dayOfWeek: "asc" },
-      })
     }
+
+    const schedule = await prisma.availability.findMany({
+      where: { isRecurring: true },
+      orderBy: { dayOfWeek: "asc" },
+    })
 
     const mapped = schedule.map((s) => ({
       id: s.id,

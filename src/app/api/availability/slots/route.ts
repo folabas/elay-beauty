@@ -17,12 +17,18 @@ const DEFAULT_SCHEDULE = [
 ]
 
 async function ensureAvailability() {
-  const count = await prisma.availability.count({ where: { isRecurring: true } })
-  if (count === 0) {
-    for (const s of DEFAULT_SCHEDULE) {
+  const existingDays = await prisma.availability.findMany({
+    where: { isRecurring: true },
+    select: { dayOfWeek: true },
+  })
+  const existingDaySet = new Set(existingDays.map((d) => d.dayOfWeek))
+
+  for (const s of DEFAULT_SCHEDULE) {
+    const dow = DAY_MAP[s.day]
+    if (!existingDaySet.has(dow)) {
       await prisma.availability.create({
         data: {
-          dayOfWeek: DAY_MAP[s.day],
+          dayOfWeek: dow,
           startTime: s.start,
           endTime: s.end,
           isRecurring: true,

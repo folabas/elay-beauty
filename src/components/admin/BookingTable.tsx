@@ -34,26 +34,68 @@ export default function BookingTable() {
   const [bookings, setBookings] = useState(initialBookings)
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null)
   const [filter, setFilter] = useState<string>("all")
+  const [processing, setProcessing] = useState<string | null>(null)
 
   const filtered = filter === "all" ? bookings : bookings.filter((b) => b.status.toLowerCase() === filter)
   const [toast, setToast] = useState<string | null>(null)
 
-  const handleCancel = (reason: string) => {
-    if (!cancelTarget) return
-    setBookings(bookings.map((b) =>
-      b.id === cancelTarget.id ? { ...b, status: "Cancelled" as const } : b
-    ))
-    setToast(`Booking #${cancelTarget.id} cancelled. Reason: ${reason}. Email sent to ${cancelTarget.email}.`)
-    setCancelTarget(null)
+  const showToast = (msg: string) => {
+    setToast(msg)
     setTimeout(() => setToast(null), 5000)
   }
 
-  const handleMarkPaid = (id: string) => {
-    setBookings(bookings.map((b) =>
-      b.id === id ? { ...b, depositPaid: true, status: "Confirmed" as const } : b
-    ))
-    setToast(`Booking #${id} deposit confirmed.`)
-    setTimeout(() => setToast(null), 5000)
+  const handleCancel = async (reason: string) => {
+    if (!cancelTarget) return
+    setProcessing(cancelTarget.id)
+
+    try {
+      const res = await fetch(`/api/bookings/${cancelTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancel", reason }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to cancel")
+      }
+
+      setBookings(bookings.map((b) =>
+        b.id === cancelTarget.id ? { ...b, status: "Cancelled" as const } : b
+      ))
+      showToast(`Booking #${cancelTarget.id} cancelled. Email sent to ${cancelTarget.email}.`)
+    } catch (err) {
+      showToast(`Error: ${err instanceof Error ? err.message : "Failed to cancel"}`)
+    } finally {
+      setProcessing(null)
+      setCancelTarget(null)
+    }
+  }
+
+  const handleMarkPaid = async (id: string) => {
+    setProcessing(id)
+
+    try {
+      const res = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark-paid" }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to mark paid")
+      }
+
+      setBookings(bookings.map((b) =>
+        b.id === id ? { ...b, depositPaid: true, status: "Confirmed" as const } : b
+      ))
+      showToast(`Booking #${id} deposit confirmed. Confirmation email sent.`)
+    } catch (err) {
+      showToast(`Error: ${err instanceof Error ? err.message : "Failed to mark paid"}`)
+    } finally {
+      setProcessing(null)
+    }
   }
 
   return (
@@ -109,9 +151,10 @@ export default function BookingTable() {
                   ) : (
                     <button
                       onClick={() => handleMarkPaid(booking.id)}
-                      className="text-xs font-medium text-accent-dark hover:text-accent"
+                      disabled={processing === booking.id}
+                      className="text-xs font-medium text-accent-dark hover:text-accent disabled:opacity-50"
                     >
-                      Mark Paid
+                      {processing === booking.id ? "..." : "Mark Paid"}
                     </button>
                   )}
                 </td>
@@ -128,9 +171,10 @@ export default function BookingTable() {
                   {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                     <button
                       onClick={() => setCancelTarget(booking)}
-                      className="text-xs font-medium text-red-500 hover:text-red-700"
+                      disabled={processing === booking.id}
+                      className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
                     >
-                      Cancel
+                      {processing === booking.id ? "..." : "Cancel"}
                     </button>
                   )}
                 </td>

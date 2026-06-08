@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | EL.AY Beauty",
+  title: {
+    default: "Admin Dashboard | EL.AY Beauty",
+    template: "%s | EL.AY Beauty",
+  },
   robots: "noindex",
 }
 

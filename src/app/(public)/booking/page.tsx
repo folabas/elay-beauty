@@ -22,6 +22,9 @@ export default function BookingPage() {
     isStudent: false,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [bookingId, setBookingId] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const allServices = Object.entries(PRICE_LIST).flatMap(([category, services]) =>
     services.map((s) => ({ ...s, category }))
@@ -58,8 +61,42 @@ export default function BookingPage() {
     setStep("payment")
   }
 
-  const handleConfirm = () => {
-    setStep("confirmation")
+  const handleConfirm = async () => {
+    setSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          serviceName: selectedService?.name,
+          date: selectedDate,
+          time: selectedTime,
+          hairLength: formData.hairLength || undefined,
+          hairType: formData.hairType || undefined,
+          notes: formData.notes || undefined,
+          isStudent: formData.isStudent,
+          totalPrice: finalPrice,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create booking")
+      }
+
+      setBookingId(data.id)
+      setStep("confirmation")
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const totalPrice = selectedService?.price ?? 0
@@ -428,6 +465,10 @@ export default function BookingPage() {
           </div>
         </div>
 
+        {submitError && (
+          <p className="mt-4 text-sm text-red-500">{submitError}</p>
+        )}
+
         <div className="mt-8 flex justify-between">
           <button
             onClick={() => setStep("details")}
@@ -437,9 +478,10 @@ export default function BookingPage() {
           </button>
           <button
             onClick={handleConfirm}
-            className="flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-primary hover:bg-accent-light"
+            disabled={submitting}
+            className="flex items-center gap-2 rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-primary hover:bg-accent-light disabled:opacity-50"
           >
-            Confirm Booking <CheckCircle className="h-4 w-4" />
+            {submitting ? "Submitting..." : "Confirm Booking"} <CheckCircle className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -482,8 +524,11 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <p className="mt-6 text-sm text-muted">
-        A confirmation email will be sent to <strong>{formData.email}</strong>
+      {bookingId && (
+        <p className="mt-4 text-xs text-muted">Booking reference: #{bookingId.slice(0, 8)}</p>
+      )}
+      <p className="mt-4 text-sm text-muted">
+        A confirmation email has been sent to <strong>{formData.email}</strong>
       </p>
 
       <button

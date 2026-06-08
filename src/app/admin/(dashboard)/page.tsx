@@ -1,22 +1,36 @@
-"use client"
-
 import { CalendarDays, Clock, DollarSign, Users } from "lucide-react"
 import Link from "next/link"
+import { prisma } from "@/lib/prisma"
 
-const stats = [
-  { label: "Total Bookings", value: "12", icon: CalendarDays, change: "+3 this week" },
-  { label: "Pending Deposits", value: "4", icon: Clock, change: "Awaiting payment" },
-  { label: "Confirmed", value: "7", icon: Users, change: "Ready for service" },
-  { label: "Revenue", value: "£840", icon: DollarSign, change: "This month" },
-]
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0]
+}
 
-const recentBookings = [
-  { id: "001", client: "Jane Smith", service: "Boho Braids", date: "2026-06-12", status: "Confirmed" },
-  { id: "002", client: "Amy Jones", service: "Knotless Braids", date: "2026-06-13", status: "Pending" },
-  { id: "003", client: "Rose Tyler", service: "Cornrows", date: "2026-06-14", status: "Confirmed" },
-]
+export default async function AdminDashboard() {
+  const totalBookings = await prisma.booking.count()
+  const pendingDeposits = await prisma.booking.count({ where: { status: "PENDING_DEPOSIT" } })
+  const confirmed = await prisma.booking.count({ where: { status: "CONFIRMED" } })
+  const revenueAgg = await prisma.booking.aggregate({
+    where: { status: { in: ["CONFIRMED", "COMPLETED"] } },
+    _sum: { totalPrice: true },
+  })
+  const recentBookings = await prisma.booking.findMany({
+    take: 5,
+    orderBy: { createdAt: "desc" },
+    include: { client: true, service: true },
+  })
 
-export default function AdminDashboard() {
+  const weekAgo = new Date()
+  weekAgo.setDate(weekAgo.getDate() - 7)
+  const thisWeek = await prisma.booking.count({ where: { createdAt: { gte: weekAgo } } })
+
+  const stats = [
+    { label: "Total Bookings", value: String(totalBookings), icon: CalendarDays, change: thisWeek > 0 ? `+${thisWeek} this week` : "No bookings yet" },
+    { label: "Pending Deposits", value: String(pendingDeposits), icon: Clock, change: pendingDeposits === 1 ? "Awaiting payment" : "Awaiting payment" },
+    { label: "Confirmed", value: String(confirmed), icon: Users, change: "Ready for service" },
+    { label: "Revenue", value: `£${(revenueAgg._sum.totalPrice ?? 0).toFixed(0)}`, icon: DollarSign, change: "From confirmed bookings" },
+  ]
+
   return (
     <div className="p-6 lg:p-8">
       <h1 className="font-serif text-xl font-bold text-primary">Dashboard</h1>
@@ -54,38 +68,48 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-4 overflow-hidden rounded-xl border border-border">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-card text-left text-sm font-medium text-muted">
-                <th className="px-4 py-3">Booking</th>
-                <th className="px-4 py-3">Client</th>
-                <th className="px-4 py-3">Service</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {recentBookings.map((booking) => (
-                <tr key={booking.id} className="bg-card text-sm">
-                  <td className="px-4 py-3 font-medium text-primary">#{booking.id}</td>
-                  <td className="px-4 py-3 text-primary">{booking.client}</td>
-                  <td className="px-4 py-3 text-muted">{booking.service}</td>
-                  <td className="px-4 py-3 text-muted">{booking.date}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                        booking.status === "Confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </td>
+          {recentBookings.length === 0 ? (
+            <div className="bg-card py-12 text-center">
+              <p className="text-sm text-muted">No bookings yet</p>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="bg-card text-left text-sm font-medium text-muted">
+                  <th className="px-4 py-3">Booking</th>
+                  <th className="px-4 py-3">Client</th>
+                  <th className="px-4 py-3">Service</th>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {recentBookings.map((booking) => (
+                  <tr key={booking.id} className="bg-card text-sm">
+                    <td className="px-4 py-3 font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</td>
+                    <td className="px-4 py-3 font-medium text-primary">{booking.client.name}</td>
+                    <td className="px-4 py-3 text-muted">{booking.service.name}</td>
+                    <td className="px-4 py-3 text-muted">{formatDate(booking.date)}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                          booking.status === "CONFIRMED"
+                            ? "bg-green-100 text-green-700"
+                            : booking.status === "PENDING_DEPOSIT"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : booking.status === "CANCELLED"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {booking.status === "PENDING_DEPOSIT" ? "Pending" : booking.status.charAt(0) + booking.status.slice(1).toLowerCase()}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import CancelBookingDialog from "./CancelBookingDialog"
 
-interface Booking {
+interface BookingRow {
   id: string
   client: string
   email: string
@@ -15,14 +15,6 @@ interface Booking {
   status: "Pending" | "Confirmed" | "Completed" | "Cancelled"
 }
 
-const initialBookings: Booking[] = [
-  { id: "001", client: "Jane Smith", email: "jane@example.com", service: "Boho Braids", date: "2026-06-12", time: "10:00", price: 130, depositPaid: true, status: "Confirmed" },
-  { id: "002", client: "Amy Jones", email: "amy@example.com", service: "Knotless Braids", date: "2026-06-13", time: "14:00", price: 80, depositPaid: false, status: "Pending" },
-  { id: "003", client: "Rose Tyler", email: "rose@example.com", service: "Cornrows", date: "2026-06-14", time: "15:00", price: 20, depositPaid: false, status: "Confirmed" },
-  { id: "004", client: "Martha Jones", email: "martha@example.com", service: "Short Boho Braids", date: "2026-06-15", time: "11:00", price: 65, depositPaid: true, status: "Pending" },
-  { id: "005", client: "Donna Noble", email: "donna@example.com", service: "Fulani Braids", date: "2026-06-19", time: "09:00", price: 80, depositPaid: true, status: "Confirmed" },
-]
-
 const statusStyles: Record<string, string> = {
   Confirmed: "bg-green-100 text-green-700",
   Pending: "bg-yellow-100 text-yellow-700",
@@ -30,9 +22,9 @@ const statusStyles: Record<string, string> = {
   Cancelled: "bg-red-100 text-red-700",
 }
 
-export default function BookingTable() {
-  const [bookings, setBookings] = useState(initialBookings)
-  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null)
+export default function BookingTable({ bookings: initial }: { bookings: BookingRow[] }) {
+  const [bookings, setBookings] = useState(initial)
+  const [cancelTarget, setCancelTarget] = useState<BookingRow | null>(null)
   const [filter, setFilter] = useState<string>("all")
   const [processing, setProcessing] = useState<string | null>(null)
 
@@ -63,7 +55,7 @@ export default function BookingTable() {
       setBookings(bookings.map((b) =>
         b.id === cancelTarget.id ? { ...b, status: "Cancelled" as const } : b
       ))
-      showToast(`Booking #${cancelTarget.id} cancelled. Email sent to ${cancelTarget.email}.`)
+      showToast(`Booking #${cancelTarget.id.slice(0, 8)} cancelled. Email sent to ${cancelTarget.email}.`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to cancel"}`)
     } finally {
@@ -90,7 +82,7 @@ export default function BookingTable() {
       setBookings(bookings.map((b) =>
         b.id === id ? { ...b, depositPaid: true, status: "Confirmed" as const } : b
       ))
-      showToast(`Booking #${id} deposit confirmed. Confirmation email sent.`)
+      showToast(`Booking #${id.slice(0, 8)} deposit confirmed. Confirmation email sent.`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to mark paid"}`)
     } finally {
@@ -134,52 +126,60 @@ export default function BookingTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {filtered.map((booking) => (
-              <tr key={booking.id} className="bg-card text-sm">
-                <td className="px-4 py-3 font-mono text-xs text-muted">#{booking.id}</td>
-                <td className="px-4 py-3">
-                  <p className="font-medium text-primary">{booking.client}</p>
-                  <p className="text-xs text-muted">{booking.email}</p>
-                </td>
-                <td className="px-4 py-3 text-muted">{booking.service}</td>
-                <td className="px-4 py-3 text-muted">{booking.date}</td>
-                <td className="px-4 py-3 text-muted">{booking.time}</td>
-                <td className="px-4 py-3 font-medium text-primary">£{booking.price}</td>
-                <td className="px-4 py-3">
-                  {booking.depositPaid ? (
-                    <span className="text-xs font-medium text-green-600">Paid</span>
-                  ) : (
-                    <button
-                      onClick={() => handleMarkPaid(booking.id)}
-                      disabled={processing === booking.id}
-                      className="text-xs font-medium text-accent-dark hover:text-accent disabled:opacity-50"
-                    >
-                      {processing === booking.id ? "..." : "Mark Paid"}
-                    </button>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                      statusStyles[booking.status]
-                    }`}
-                  >
-                    {booking.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {booking.status !== "Cancelled" && booking.status !== "Completed" && (
-                    <button
-                      onClick={() => setCancelTarget(booking)}
-                      disabled={processing === booking.id}
-                      className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
-                    >
-                      {processing === booking.id ? "..." : "Cancel"}
-                    </button>
-                  )}
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="bg-card py-12 text-center text-sm text-muted">
+                  No bookings found
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((booking) => (
+                <tr key={booking.id} className="bg-card text-sm">
+                  <td className="px-4 py-3 font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-primary">{booking.client}</p>
+                    <p className="text-xs text-muted">{booking.email}</p>
+                  </td>
+                  <td className="px-4 py-3 text-muted">{booking.service}</td>
+                  <td className="px-4 py-3 text-muted">{booking.date}</td>
+                  <td className="px-4 py-3 text-muted">{booking.time}</td>
+                  <td className="px-4 py-3 font-medium text-primary">£{booking.price}</td>
+                  <td className="px-4 py-3">
+                    {booking.depositPaid ? (
+                      <span className="text-xs font-medium text-green-600">Paid</span>
+                    ) : (
+                      <button
+                        onClick={() => handleMarkPaid(booking.id)}
+                        disabled={processing === booking.id}
+                        className="text-xs font-medium text-accent-dark hover:text-accent disabled:opacity-50"
+                      >
+                        {processing === booking.id ? "..." : "Mark Paid"}
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                        statusStyles[booking.status]
+                      }`}
+                    >
+                      {booking.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {booking.status !== "Cancelled" && booking.status !== "Completed" && (
+                      <button
+                        onClick={() => setCancelTarget(booking)}
+                        disabled={processing === booking.id}
+                        className="text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50"
+                      >
+                        {processing === booking.id ? "..." : "Cancel"}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

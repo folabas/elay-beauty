@@ -1,38 +1,119 @@
 "use client"
 
-import { useState } from "react"
-import { AVAILABILITY_SCHEDULE } from "@/types"
+import { useState, useEffect } from "react"
 
 interface DaySchedule {
+  id: string
   day: string
   start: string
   end: string
   isActive: boolean
 }
 
+interface BlockedDate {
+  id: string
+  date: string
+  reason: string | null
+}
+
 export default function AvailabilityEditor() {
-  const [schedule, setSchedule] = useState<DaySchedule[]>(
-    AVAILABILITY_SCHEDULE.map((s) => ({ ...s, isActive: true }))
-  )
-  const [blockedDates, setBlockedDates] = useState<
-    { date: string; reason: string }[]
-  >([])
+  const [schedule, setSchedule] = useState<DaySchedule[]>([])
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([])
   const [newBlocked, setNewBlocked] = useState({ date: "", reason: "" })
+  const [loading, setLoading] = useState(true)
+  const [toggling, setToggling] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
-  const toggleDay = (day: string) => {
-    setSchedule(
-      schedule.map((s) => (s.day === day ? { ...s, isActive: !s.isActive } : s))
-    )
+  const showToast = (msg: string) => {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
   }
 
-  const addBlockedDate = () => {
+  useEffect(() => {
+    async function load() {
+      try {
+        const [availRes, blockedRes] = await Promise.all([
+          fetch("/api/availability"),
+          fetch("/api/blocked-slots"),
+        ])
+        if (availRes.ok) setSchedule(await availRes.json())
+        if (blockedRes.ok) setBlockedDates(await blockedRes.json())
+      } catch {
+        showToast("Failed to load availability")
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  const toggleDay = async (id: string, current: boolean) => {
+    setToggling(id)
+    setSchedule(schedule.map((s) => (s.id === id ? { ...s, isActive: !current } : s)))
+
+    try {
+      const res = await fetch("/api/availability", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isActive: !current }),
+      })
+      if (!res.ok) {
+        setSchedule(schedule.map((s) => (s.id === id ? { ...s, isActive: current } : s)))
+        showToast("Failed to update")
+      }
+    } catch {
+      setSchedule(schedule.map((s) => (s.id === id ? { ...s, isActive: current } : s)))
+      showToast("Failed to update")
+    } finally {
+      setToggling(null)
+    }
+  }
+
+  const addBlockedDate = async () => {
     if (!newBlocked.date) return
-    setBlockedDates([...blockedDates, newBlocked])
-    setNewBlocked({ date: "", reason: "" })
+    setAdding(true)
+
+    try {
+      const res = await fetch("/api/blocked-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBlocked),
+      })
+      if (res.ok) {
+        const created = await res.json()
+        setBlockedDates([...blockedDates, created])
+        setNewBlocked({ date: "", reason: "" })
+        showToast("Date blocked")
+      } else {
+        showToast("Failed to add blocked date")
+      }
+    } catch {
+      showToast("Failed to add blocked date")
+    } finally {
+      setAdding(false)
+    }
   }
 
-  const removeBlockedDate = (date: string) => {
-    setBlockedDates(blockedDates.filter((b) => b.date !== date))
+  const removeBlockedDate = async (id: string) => {
+    try {
+      const res = await fetch(`/api/blocked-slots/${id}`, { method: "DELETE" })
+      if (res.ok) {
+        setBlockedDates(blockedDates.filter((b) => b.id !== id))
+      } else {
+        showToast("Failed to remove blocked date")
+      }
+    } catch {
+      showToast("Failed to remove blocked date")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-sm text-muted">Loading availability...</p>
+      </div>
+    )
   }
 
   return (
@@ -48,14 +129,15 @@ export default function AvailabilityEditor() {
         <div className="mt-4 space-y-3">
           {schedule.map((day) => (
             <div
-              key={day.day}
+              key={day.id}
               className={`flex items-center justify-between rounded-lg border p-4 ${
                 day.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
               }`}
             >
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => toggleDay(day.day)}
+                  onClick={() => toggleDay(day.id, day.isActive)}
+                  disabled={toggling === day.id}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     day.isActive ? "bg-accent" : "bg-border"
                   }`}
@@ -110,9 +192,10 @@ export default function AvailabilityEditor() {
           />
           <button
             onClick={addBlockedDate}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-light"
+            disabled={adding || !newBlocked.date}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-light disabled:opacity-50"
           >
-            Add
+            {adding ? "..." : "Add"}
           </button>
         </div>
 
@@ -120,7 +203,7 @@ export default function AvailabilityEditor() {
           <div className="mt-4 space-y-2">
             {blockedDates.map((blocked) => (
               <div
-                key={blocked.date}
+                key={blocked.id}
                 className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
               >
                 <div>
@@ -130,7 +213,7 @@ export default function AvailabilityEditor() {
                   )}
                 </div>
                 <button
-                  onClick={() => removeBlockedDate(blocked.date)}
+                  onClick={() => removeBlockedDate(blocked.id)}
                   className="text-xs font-medium text-red-500 hover:text-red-700"
                 >
                   Remove
@@ -139,7 +222,17 @@ export default function AvailabilityEditor() {
             ))}
           </div>
         )}
+
+        {blockedDates.length === 0 && (
+          <p className="mt-4 text-sm text-muted">No blocked dates</p>
+        )}
       </div>
+
+      {toast && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm text-white shadow-elevated">
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

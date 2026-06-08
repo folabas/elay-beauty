@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "prisma generate && next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vercel-build": "prisma migrate deploy && prisma generate && next build --webpack"
   },
   "dependencies": {
     "@hookform/resolvers": "4.1.3",

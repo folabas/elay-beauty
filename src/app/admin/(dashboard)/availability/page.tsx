@@ -1,5 +1,3 @@
-"use client"
-
 import AvailabilityEditor from "@/components/admin/AvailabilityEditor"
 
 export default function AdminAvailabilityPage() {

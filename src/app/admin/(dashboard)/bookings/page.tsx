@@ -1,9 +1,32 @@
-"use client"
-
 import Link from "next/link"
+import { prisma } from "@/lib/prisma"
 import BookingTable from "@/components/admin/BookingTable"
 
-export default function AdminBookingsPage() {
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0]
+}
+
+export default async function AdminBookingsPage() {
+  const bookings = await prisma.booking.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { client: true, service: true },
+  })
+
+  const mapped = bookings.map((b) => ({
+    id: b.id,
+    client: b.client.name,
+    email: b.client.email,
+    service: b.service.name,
+    date: formatDate(b.date),
+    time: b.time,
+    price: b.totalPrice,
+    depositPaid: b.depositPaid,
+    status: b.status === "PENDING_DEPOSIT" ? "Pending" as const
+          : b.status === "CONFIRMED" ? "Confirmed" as const
+          : b.status === "COMPLETED" ? "Completed" as const
+          : "Cancelled" as const,
+  }))
+
   return (
     <div className="p-6 lg:p-8">
       <div className="flex items-center justify-between">
@@ -17,7 +40,7 @@ export default function AdminBookingsPage() {
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-soft">
-        <BookingTable />
+        <BookingTable bookings={mapped} />
       </div>
     </div>
   )

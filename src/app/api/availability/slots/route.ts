@@ -55,10 +55,18 @@ export async function GET(request: Request) {
 
     const blockedSlots = await prisma.blockedSlot.findMany({
       where: {
-        date: {
-          gte: new Date(dateStr + "T00:00:00Z"),
-          lt: new Date(dateStr + "T23:59:59Z"),
-        },
+        OR: [
+          {
+            date: {
+              gte: new Date(dateStr + "T00:00:00Z"),
+              lt: new Date(dateStr + "T23:59:59Z"),
+            },
+          },
+          {
+            date: { lte: new Date(dateStr + "T23:59:59Z") },
+            endDate: { gte: new Date(dateStr + "T00:00:00Z") },
+          },
+        ],
       },
     })
 
@@ -80,20 +88,7 @@ export async function GET(request: Request) {
       hour++
     }
 
-    function isBlocked(time: string): boolean {
-      const [checkH, checkM] = time.split(":").map(Number)
-      const checkMinutes = checkH * 60 + checkM
-      for (const blocked of blockedSlots) {
-        const [bStartH, bStartM] = blocked.startTime.split(":").map(Number)
-        const [bEndH, bEndM] = blocked.endTime.split(":").map(Number)
-        const startMinutes = bStartH * 60 + bStartM
-        const endMinutes = bEndH * 60 + bEndM
-        if (checkMinutes >= startMinutes && checkMinutes < endMinutes) {
-          return true
-        }
-      }
-      return false
-    }
+    const isBlocked = blockedSlots.length > 0
 
     const isSunday = dayOfWeek === 0
 
@@ -112,10 +107,10 @@ export async function GET(request: Request) {
 
     const slotList = allSlots.map((time) => ({
       time,
-      available: !dayFull && !isBlocked(time),
+      available: !dayFull && !isBlocked,
     }))
 
-    const fullyBlocked = blockedSlots.length > 0 && allSlots.every((s) => isBlocked(s))
+    const fullyBlocked = isBlocked
 
     return NextResponse.json({ slots: slotList, isSunday, dayFull, fullyBlocked })
   } catch (error) {

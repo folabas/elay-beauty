@@ -93,6 +93,7 @@ model CalendarToken {
 model BlockedSlot {
   id        String   @id @default(cuid())
   date      DateTime
+  endDate   DateTime?
   startTime String
   endTime   String
   reason    String?

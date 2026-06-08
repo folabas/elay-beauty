@@ -14,22 +14,14 @@ interface DaySchedule {
 interface BlockedDate {
   id: string
   date: string
-  startTime: string
-  endTime: string
+  endDate: string | null
   reason: string | null
 }
-
-const TIME_OPTIONS = [
-  "00:00", "01:00", "02:00", "03:00", "04:00", "05:00",
-  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
-  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
-  "18:00", "19:00", "20:00", "21:00", "22:00", "23:00",
-]
 
 export default function AvailabilityEditor() {
   const [schedule, setSchedule] = useState<DaySchedule[]>([])
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([])
-  const [newBlocked, setNewBlocked] = useState({ date: "", startTime: "09:00", endTime: "17:00", reason: "" })
+  const [newBlocked, setNewBlocked] = useState({ fromDate: "", toDate: "", reason: "" })
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
@@ -81,7 +73,7 @@ export default function AvailabilityEditor() {
   }
 
   const addBlockedDate = async () => {
-    if (!newBlocked.date) return
+    if (!newBlocked.fromDate) return
     setAdding(true)
 
     try {
@@ -93,7 +85,7 @@ export default function AvailabilityEditor() {
       if (res.ok) {
         const created = await res.json()
         setBlockedDates([...blockedDates, created])
-        setNewBlocked({ date: "", startTime: "09:00", endTime: "17:00", reason: "" })
+        setNewBlocked({ fromDate: "", toDate: "", reason: "" })
         showToast("Date blocked")
       } else {
         showToast("Failed to add blocked date")
@@ -188,47 +180,30 @@ export default function AvailabilityEditor() {
         <div className="mt-4 space-y-3 rounded-lg border border-border bg-card p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-muted">Date</label>
+              <label className="mb-1 block text-xs font-medium text-muted">From date</label>
               <input
                 type="date"
-                value={newBlocked.date}
+                value={newBlocked.fromDate}
                 onChange={(e) =>
-                  setNewBlocked({ ...newBlocked, date: e.target.value })
+                  setNewBlocked({ ...newBlocked, fromDate: e.target.value })
                 }
                 className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
               />
             </div>
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-muted">From</label>
-              <select
-                value={newBlocked.startTime}
+              <label className="mb-1 block text-xs font-medium text-muted">To date</label>
+              <input
+                type="date"
+                value={newBlocked.toDate}
                 onChange={(e) =>
-                  setNewBlocked({ ...newBlocked, startTime: e.target.value })
+                  setNewBlocked({ ...newBlocked, toDate: e.target.value })
                 }
                 className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
-              >
-                {TIME_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-muted">To</label>
-              <select
-                value={newBlocked.endTime}
-                onChange={(e) =>
-                  setNewBlocked({ ...newBlocked, endTime: e.target.value })
-                }
-                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
-              >
-                {TIME_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+              />
             </div>
             <button
               onClick={addBlockedDate}
-              disabled={adding || !newBlocked.date}
+              disabled={adding || !newBlocked.fromDate}
               className="w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end"
             >
               {adding ? "..." : "Add"}
@@ -253,11 +228,15 @@ export default function AvailabilityEditor() {
                 className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/5"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-primary">{blocked.date}</p>
-                  <p className="text-xs text-muted">
-                    {blocked.startTime} – {blocked.endTime}
-                    {blocked.reason && <span> &middot; {blocked.reason}</span>}
+                  <p className="text-sm font-medium text-primary">
+                    {blocked.date}
+                    {blocked.endDate && blocked.endDate !== blocked.date && (
+                      <span> – {blocked.endDate}</span>
+                    )}
                   </p>
+                  {blocked.reason && (
+                    <p className="text-xs text-muted">{blocked.reason}</p>
+                  )}
                 </div>
                 <button
                   onClick={() => removeBlockedDate(blocked.id)}

@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   CalendarCheck,
   CalendarRange,
+  Settings,
   LogOut,
   ExternalLink,
   Menu,
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/availability", label: "Availability", icon: CalendarRange },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
 export default function AdminSidebar() {

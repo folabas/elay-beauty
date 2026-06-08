@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, bookingConfirmationEmail, cancellationEmail, rescheduleOfferEmail } from "@/lib/email"
+import { createBookingEvent, deleteBookingEvent } from "@/lib/google-calendar"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -18,9 +19,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     if (action === "mark-paid") {
-      await prisma.booking.update({
+      const updated = await prisma.booking.update({
         where: { id },
         data: { depositPaid: true, status: "CONFIRMED" },
+        include: { client: true, service: true },
       })
 
       const dateStr = booking.date.toISOString().split("T")[0]
@@ -36,9 +38,24 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         }),
       })
 
+      let calendarWarning: string | undefined
+      try {
+        const event = await createBookingEvent(updated)
+        if (event.id) {
+          await prisma.booking.update({
+            where: { id },
+            data: { googleEventId: event.id },
+          })
+        }
+      } catch (err) {
+        calendarWarning = err instanceof Error ? err.message : "Unknown error"
+        console.error("[CALENDAR] Failed to create event:", err)
+      }
+
       return NextResponse.json({
         message: "Deposit confirmed",
         emailWarning: emailResult.ok ? undefined : `Email failed: ${emailResult.error}`,
+        calendarWarning: calendarWarning ? `Calendar event failed: ${calendarWarning}` : undefined,
       })
     }
 
@@ -51,6 +68,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         where: { id },
         data: { status: "CANCELLED", cancellationReason: reason },
       })
+
+      if (booking.googleEventId) {
+        deleteBookingEvent(booking.googleEventId).catch((err) =>
+          console.error("[CALENDAR] Failed to delete event:", err)
+        )
+      }
 
       const shortId = booking.id.slice(0, 8)
       let emailResult: { ok: boolean; error?: string }

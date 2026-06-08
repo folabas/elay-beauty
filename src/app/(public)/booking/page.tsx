@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PRICE_LIST, AVAILABILITY_SCHEDULE, type BookingFormData } from "@/types"
+import { PRICE_LIST, type BookingFormData } from "@/types"
+import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
 
 type Step = "service" | "datetime" | "details" | "payment" | "confirmation"
@@ -241,31 +242,7 @@ export default function BookingPage() {
       )}
 
       <div className="mt-6 space-y-4">
-        <div>
-          <label className="text-sm font-medium text-primary">Select Date</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
-            className="mt-1 block w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-primary">Available Time Slots</label>
-          <div className="mt-2 rounded-lg border border-border bg-card p-4">
-            <p className="text-sm font-medium text-primary">Weekly Schedule</p>
-            <div className="mt-2 space-y-2">
-              {AVAILABILITY_SCHEDULE.map((slot) => (
-                <div key={slot.day} className="text-sm text-muted">
-                  <span className="font-medium text-primary">{slot.day}:</span>{" "}
-                  {slot.start} – {slot.end}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <DatePicker selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
         {selectedDate && (
           <div>

@@ -392,7 +392,7 @@ export default function BookingPage() {
               <option value="">Select...</option>
               <option value="natural">Natural</option>
               <option value="relaxed">Relaxed</option>
-              <option value="braided">Braided</option>
+              <option value="short">Short Hair</option>
               <option value="other">Other</option>
             </select>
           </div>

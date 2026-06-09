@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
-import { PRICE_LIST, SERVICE_IMAGES, type BookingFormData } from "@/types"
+import { SERVICE_IMAGES, type BookingFormData } from "@/types"
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
 
@@ -76,9 +76,20 @@ export default function BookingPage() {
     fetchSlots()
   }, [selectedDate])
 
-  const allServices = Object.entries(PRICE_LIST).flatMap(([category, services]) =>
-    services.map((s) => ({ ...s, category }))
-  )
+  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string }[]>([])
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/services")
+        if (res.ok) {
+          const data = await res.json()
+          setAllServices(data.map((s: { name: string; price: number; category: string; id: string }) => ({ ...s, category: s.category })))
+        }
+      } catch { /* ignore */ }
+    }
+    load()
+  }, [])
 
   const filteredServices = selectedCategory
     ? allServices.filter((s) => s.category === selectedCategory)

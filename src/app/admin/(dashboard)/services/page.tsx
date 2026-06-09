@@ -19,6 +19,7 @@ interface Service {
   duration: number | null
   requiresHairInfo: boolean
   isActive: boolean
+  imageUrl: string | null
 }
 
 export default function AdminServicesPage() {
@@ -36,8 +37,10 @@ export default function AdminServicesPage() {
     description: "",
     duration: "",
     requiresHairInfo: true,
+    imageUrl: "",
   })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -60,7 +63,7 @@ export default function AdminServicesPage() {
   }
 
   const resetForm = () => {
-    setForm({ name: "", category: "BRAIDS", price: "", description: "", duration: "", requiresHairInfo: true })
+    setForm({ name: "", category: "BRAIDS", price: "", description: "", duration: "", requiresHairInfo: true, imageUrl: "" })
     setEditingId(null)
     setShowForm(false)
   }
@@ -73,9 +76,31 @@ export default function AdminServicesPage() {
       description: service.description || "",
       duration: service.duration ? String(service.duration) : "",
       requiresHairInfo: service.requiresHairInfo,
+      imageUrl: service.imageUrl || "",
     })
     setEditingId(service.id)
     setShowForm(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      if (res.ok) {
+        const { url } = await res.json()
+        setForm({ ...form, imageUrl: url })
+      } else {
+        showToast("Upload failed")
+      }
+    } catch {
+      showToast("Upload failed")
+    } finally {
+      setUploading(false)
+    }
   }
 
   const saveService = async () => {
@@ -91,6 +116,7 @@ export default function AdminServicesPage() {
         description: form.description || null,
         duration: form.duration ? parseInt(form.duration) : null,
         requiresHairInfo: form.requiresHairInfo,
+        imageUrl: form.imageUrl || null,
       }
 
       const res = await fetch("/api/services", {
@@ -244,6 +270,36 @@ export default function AdminServicesPage() {
                 />
               </div>
               <div className="sm:col-span-2">
+                <label className="mb-1 block text-xs font-medium text-muted">Image</label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted transition-all hover:text-primary active:scale-95">
+                      {uploading ? "Uploading..." : "Choose file"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-xs text-muted">or paste URL</span>
+                    <input
+                      type="text"
+                      value={form.imageUrl}
+                      onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                      placeholder="https://..."
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                  {form.imageUrl && (
+                    <div className="relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-background">
+                      <img src={form.imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="sm:col-span-2">
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="checkbox"
@@ -289,16 +345,23 @@ export default function AdminServicesPage() {
                       service.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
                     }`}
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-medium ${service.isActive ? "text-primary" : "text-muted"}`}>
-                        {service.name}
-                      </p>
-                      <p className="text-xs text-muted">
-                        £{service.price}
-                        {service.duration && <span> · {service.duration}min</span>}
-                        {service.description && <span> · {service.description}</span>}
-                        {!service.isActive && <span> · Disabled</span>}
-                      </p>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {service.imageUrl && (
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border bg-background">
+                          <img src={service.imageUrl} alt="" className="h-full w-full object-cover" />
+                        </div>
+                      )}
+                      <div>
+                        <p className={`text-sm font-medium ${service.isActive ? "text-primary" : "text-muted"}`}>
+                          {service.name}
+                        </p>
+                        <p className="text-xs text-muted">
+                          £{service.price}
+                          {service.duration && <span> · {service.duration}min</span>}
+                          {service.description && <span> · {service.description}</span>}
+                          {!service.isActive && <span> · Disabled</span>}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 ml-4">
                       <button

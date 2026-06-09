@@ -54,6 +54,7 @@ export async function GET() {
       day: REVERSE_DAY[s.dayOfWeek ?? 5] ?? "Unknown",
       start: s.startTime,
       end: s.endTime,
+      timeSlots: s.timeSlots ? JSON.parse(s.timeSlots) : null,
       isActive: s.isActive,
     }))
 
@@ -67,15 +68,21 @@ export async function GET() {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, isActive } = body
+    const { id, isActive, startTime, endTime, timeSlots } = body
 
-    if (!id || typeof isActive !== "boolean") {
-      return NextResponse.json({ error: "Missing id or isActive" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 })
     }
+
+    const data: Record<string, unknown> = {}
+    if (typeof isActive === "boolean") data.isActive = isActive
+    if (startTime !== undefined) data.startTime = startTime
+    if (endTime !== undefined) data.endTime = endTime
+    if (timeSlots !== undefined) data.timeSlots = timeSlots ? JSON.stringify(timeSlots) : null
 
     await prisma.availability.update({
       where: { id },
-      data: { isActive },
+      data,
     })
 
     return NextResponse.json({ success: true })

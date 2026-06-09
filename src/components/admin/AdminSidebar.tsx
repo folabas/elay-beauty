@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Menu,
   X,
+  ShoppingBag,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -19,6 +20,7 @@ import { useState, useEffect } from "react"
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
+  { href: "/admin/services", label: "Services", icon: ShoppingBag },
   { href: "/admin/availability", label: "Availability", icon: CalendarRange },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ]

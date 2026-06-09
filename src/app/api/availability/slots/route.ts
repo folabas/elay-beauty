@@ -39,6 +39,19 @@ async function ensureAvailability() {
   }
 }
 
+function generateSlotsFromRange(startTime: string, endTime: string): string[] {
+  const slots: string[] = []
+  const [startH, startM] = startTime.split(":").map(Number)
+  const [endH, endM] = endTime.split(":").map(Number)
+
+  let hour = startH
+  while (hour < endH || (hour === endH && 0 < endM)) {
+    slots.push(`${String(hour).padStart(2, "0")}:00`)
+    hour++
+  }
+  return slots
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -50,8 +63,7 @@ export async function GET(request: Request) {
 
     await ensureAvailability()
 
-    const date = new Date(dateStr + "T00:00:00Z")
-    const dayOfWeek = date.getUTCDay()
+    const dayOfWeek = new Date(dateStr + "T00:00:00Z").getUTCDay()
 
     const blockedSlots = await prisma.blockedSlot.findMany({
       where: {
@@ -78,19 +90,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ slots: [], message: "No availability for this day" })
     }
 
-    const allSlots: string[] = []
-    const [startH, startM] = availability.startTime.split(":").map(Number)
-    const [endH, endM] = availability.endTime.split(":").map(Number)
-
-    let hour = startH
-    while (hour < endH || (hour === endH && 0 < endM)) {
-      allSlots.push(`${String(hour).padStart(2, "0")}:00`)
-      hour++
-    }
+    const allSlots: string[] = availability.timeSlots
+      ? JSON.parse(availability.timeSlots)
+      : generateSlotsFromRange(availability.startTime, availability.endTime)
 
     const isBlocked = blockedSlots.length > 0
-
-    const isSunday = dayOfWeek === 0
 
     const existingBooking = await prisma.booking.findFirst({
       where: {
@@ -112,7 +116,7 @@ export async function GET(request: Request) {
 
     const fullyBlocked = isBlocked
 
-    return NextResponse.json({ slots: slotList, isSunday, dayFull, fullyBlocked })
+    return NextResponse.json({ slots: slotList, fullyBlocked })
   } catch (error) {
     console.error("Failed to fetch slots:", error)
     return NextResponse.json({ error: "Failed to fetch slots" }, { status: 500 })

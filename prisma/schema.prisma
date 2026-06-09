@@ -55,6 +55,7 @@ model Availability {
   specificDate  DateTime?
   startTime     String
   endTime       String
+  timeSlots     String?
   isRecurring   Boolean  @default(true)
   isActive      Boolean  @default(true)
   restrictedTo  Category[]

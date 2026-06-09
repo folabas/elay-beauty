@@ -8,6 +8,7 @@ interface DaySchedule {
   day: string
   start: string
   end: string
+  timeSlots: string[] | null
   isActive: boolean
 }
 
@@ -18,14 +19,28 @@ interface BlockedDate {
   reason: string | null
 }
 
+const TIME_OPTIONS = [
+  "00:00", "01:00", "02:00", "03:00", "04:00", "05:00",
+  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00",
+  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00",
+  "18:00", "19:00", "20:00", "21:00", "22:00", "23:00",
+]
+
 export default function AvailabilityEditor() {
   const [schedule, setSchedule] = useState<DaySchedule[]>([])
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([])
   const [newBlocked, setNewBlocked] = useState({ fromDate: "", toDate: "", reason: "" })
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
+  const [saving, setSaving] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [editingDay, setEditingDay] = useState<string | null>(null)
+
+  const [editMode, setEditMode] = useState<"range" | "slots">("range")
+  const [editStart, setEditStart] = useState("09:00")
+  const [editEnd, setEditEnd] = useState("17:00")
+  const [editSlots, setEditSlots] = useState<string[]>(["10:00"])
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -70,6 +85,82 @@ export default function AvailabilityEditor() {
     } finally {
       setToggling(null)
     }
+  }
+
+  const openEditor = (day: DaySchedule) => {
+    setEditingDay(day.id)
+    if (day.timeSlots && day.timeSlots.length > 0) {
+      setEditMode("slots")
+      setEditSlots([...day.timeSlots])
+      setEditStart(day.start)
+      setEditEnd(day.end)
+    } else {
+      setEditMode("range")
+      setEditStart(day.start)
+      setEditEnd(day.end)
+      setEditSlots(["10:00"])
+    }
+  }
+
+  const saveDay = async () => {
+    if (!editingDay) return
+    setSaving(editingDay)
+
+    try {
+      const body: Record<string, unknown> = { id: editingDay }
+
+      if (editMode === "range") {
+        body.startTime = editStart
+        body.endTime = editEnd
+        body.timeSlots = null
+      } else {
+        const sorted = [...editSlots].filter((s) => s).sort()
+        body.timeSlots = sorted
+        body.startTime = sorted[0] || "09:00"
+        body.endTime = "23:59"
+      }
+
+      const res = await fetch("/api/availability", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      if (res.ok) {
+        setSchedule(
+          schedule.map((s) =>
+            s.id === editingDay
+              ? {
+                  ...s,
+                  start: editMode === "range" ? editStart : body.timeSlots[0] || s.start,
+                  end: editMode === "range" ? editEnd : s.end,
+                  timeSlots: editMode === "slots" ? body.timeSlots : null,
+                }
+              : s
+          )
+        )
+        setEditingDay(null)
+        showToast("Saved")
+      } else {
+        showToast("Failed to save")
+      }
+    } catch {
+      showToast("Failed to save")
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const addSlot = () => {
+    setEditSlots([...editSlots, "10:00"])
+  }
+
+  const removeSlot = (index: number) => {
+    setEditSlots(editSlots.filter((_, i) => i !== index))
+  }
+
+  const updateSlot = (index: number, value: string) => {
+    setEditSlots(editSlots.map((s, i) => (i === index ? value : s)))
   }
 
   const addBlockedDate = async () => {
@@ -128,42 +219,163 @@ export default function AvailabilityEditor() {
           Weekly Schedule
         </h2>
         <p className="mt-1 text-sm text-muted">
-          Set your recurring weekly availability
+          Set your recurring weekly availability and custom time slots per day
         </p>
 
         <div className="mt-4 space-y-3">
           {schedule.map((day) => (
-            <div
-              key={day.id}
-              className={`flex items-center justify-between rounded-lg border p-4 transition-all duration-200 ${
-                day.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => toggleDay(day.id, day.isActive)}
-                  disabled={toggling === day.id}
-                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 ${
-                    day.isActive ? "bg-accent" : "bg-border"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                      day.isActive ? "translate-x-6" : "translate-x-1"
+            <div key={day.id}>
+              <div
+                className={`flex items-center justify-between rounded-lg border p-4 transition-all duration-200 ${
+                  day.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <button
+                    onClick={() => toggleDay(day.id, day.isActive)}
+                    disabled={toggling === day.id}
+                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                      day.isActive ? "bg-accent" : "bg-border"
                     }`}
-                  />
-                </button>
-                <div>
-                  <p className={`text-sm font-medium ${day.isActive ? "text-primary" : "text-muted"}`}>
-                    {day.day}
-                  </p>
-                  {day.isActive && (
-                    <p className="text-xs text-muted">
-                      {day.start} – {day.end}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                        day.isActive ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm font-medium ${day.isActive ? "text-primary" : "text-muted"}`}>
+                      {day.day}
                     </p>
-                  )}
+                    {day.isActive && (
+                      <p className="text-xs text-muted truncate">
+                        {day.timeSlots
+                          ? `Slots: ${day.timeSlots.join(", ")}`
+                          : `${day.start} – ${day.end}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
+                {day.isActive && (
+                  <button
+                    onClick={() => openEditor(day)}
+                    className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-accent-dark transition-all duration-200 hover:bg-accent/10 active:scale-95"
+                  >
+                    Edit Times
+                  </button>
+                )}
               </div>
+
+              <AnimatePresence>
+                {editingDay === day.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-1 rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setEditMode("range")}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                            editMode === "range"
+                              ? "bg-accent text-white"
+                              : "bg-card text-muted hover:text-primary"
+                          }`}
+                        >
+                          Time Range
+                        </button>
+                        <button
+                          onClick={() => setEditMode("slots")}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                            editMode === "slots"
+                              ? "bg-accent text-white"
+                              : "bg-card text-muted hover:text-primary"
+                          }`}
+                        >
+                          Custom Slots
+                        </button>
+                      </div>
+
+                      {editMode === "range" ? (
+                        <div className="flex gap-3 items-end">
+                          <div>
+                            <label className="mb-1 block text-xs text-muted">From</label>
+                            <select
+                              value={editStart}
+                              onChange={(e) => setEditStart(e.target.value)}
+                              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                            >
+                              {TIME_OPTIONS.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-xs text-muted">To</label>
+                            <select
+                              value={editEnd}
+                              onChange={(e) => setEditEnd(e.target.value)}
+                              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                            >
+                              {TIME_OPTIONS.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {editSlots.map((slot, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <select
+                                value={slot}
+                                onChange={(e) => updateSlot(index, e.target.value)}
+                                className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                              >
+                                {TIME_OPTIONS.map((t) => (
+                                  <option key={t} value={t}>{t}</option>
+                                ))}
+                              </select>
+                              <button
+                                onClick={() => removeSlot(index)}
+                                className="rounded-lg px-2 py-2 text-xs text-red-500 hover:bg-red-50 transition-all active:scale-95"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            onClick={addSlot}
+                            className="text-xs font-medium text-accent-dark hover:text-accent transition-all"
+                          >
+                            + Add time slot
+                          </button>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={saveDay}
+                          disabled={saving === day.id}
+                          className="rounded-lg bg-accent px-4 py-1.5 text-xs font-medium text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50"
+                        >
+                          {saving === day.id ? "..." : "Save"}
+                        </button>
+                        <button
+                          onClick={() => setEditingDay(null)}
+                          className="rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-all hover:text-primary active:scale-95"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ))}
         </div>

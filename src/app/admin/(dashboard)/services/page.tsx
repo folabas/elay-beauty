@@ -252,7 +252,7 @@ export default function AdminServicesPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-muted">Duration (minutes)</label>
+                <label className="mb-1 block text-xs font-medium text-muted">Duration (hours)</label>
                 <input
                   type="number"
                   value={form.duration}
@@ -357,7 +357,7 @@ export default function AdminServicesPage() {
                         </p>
                         <p className="text-xs text-muted">
                           £{service.price}
-                          {service.duration && <span> · {service.duration}min</span>}
+                          {service.duration && <span> · {service.duration}h</span>}
                           {service.description && <span> · {service.description}</span>}
                           {!service.isActive && <span> · Disabled</span>}
                         </p>

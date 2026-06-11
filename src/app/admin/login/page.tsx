@@ -31,7 +31,6 @@ export default function AdminLoginPage() {
   }
 
   return (
-  return (
     <div className="flex min-h-screen items-center justify-center bg-background bg-grid relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 pointer-events-none" />
       <div className="mx-4 w-full max-w-sm relative z-10">

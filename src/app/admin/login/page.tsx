@@ -31,49 +31,51 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="mx-4 w-full max-w-sm">
-        <div className="rounded-xl border border-border bg-card p-8 shadow-elevated">
-          <div className="text-center">
-            <h1 className="font-serif text-2xl font-bold text-primary">
-              Admin Login
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background bg-grid relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 pointer-events-none" />
+      <div className="mx-4 w-full max-w-sm relative z-10">
+        <div className="glass-card border border-primary/10 rounded-[32px] p-8 sm:p-10 shadow-elevated">
+          <div className="text-center mb-8">
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-primary">
+              Admin<span className="text-accent">.</span>
             </h1>
-            <p className="mt-2 text-sm text-muted">Sign in to manage bookings</p>
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-widest text-primary/50">Manage your bookings</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-sm font-medium text-primary">Email</label>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                className="block w-full rounded-2xl border border-primary/10 bg-white/50 px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:bg-white focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all placeholder:text-primary/30"
                 placeholder="admin@example.com"
                 required
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-primary">Password</label>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                className="block w-full rounded-2xl border border-primary/10 bg-white/50 px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:bg-white focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all placeholder:text-primary/30"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             {error && (
-              <p className="text-sm text-red-500">{error}</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-red-500 text-center">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-light disabled:opacity-50"
+              className="mt-2 w-full rounded-full bg-primary px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 disabled:opacity-50 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>

@@ -215,10 +215,10 @@ export default function AvailabilityEditor() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="font-serif text-xl font-bold text-primary">
+        <h2 className="font-serif text-2xl font-bold text-primary">
           Weekly Schedule
         </h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-primary/50">
           Set your recurring weekly availability and custom time slots per day
         </p>
 
@@ -226,30 +226,30 @@ export default function AvailabilityEditor() {
           {schedule.map((day) => (
             <div key={day.id}>
               <div
-                className={`flex items-center justify-between rounded-lg border p-4 transition-all duration-200 ${
-                  day.isActive ? "border-border bg-card" : "border-dashed border-border bg-card/50"
+                className={`flex items-center justify-between rounded-2xl border p-4 transition-all duration-300 ${
+                  day.isActive ? "border-primary/10 bg-white/50 shadow-sm" : "border-dashed border-primary/10 bg-white/20"
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-4 min-w-0 flex-1">
                   <button
                     onClick={() => toggleDay(day.id, day.isActive)}
                     disabled={toggling === day.id}
-                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 ${
-                      day.isActive ? "bg-accent" : "bg-border"
+                    className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full transition-colors duration-300 ${
+                      day.isActive ? "bg-accent" : "bg-primary/10"
                     }`}
                   >
                     <span
-                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                        day.isActive ? "translate-x-6" : "translate-x-1"
+                      className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                        day.isActive ? "translate-x-7" : "translate-x-1"
                       }`}
                     />
                   </button>
                   <div className="min-w-0 flex-1">
-                    <p className={`text-sm font-medium ${day.isActive ? "text-primary" : "text-muted"}`}>
+                    <p className={`text-base font-bold ${day.isActive ? "text-primary" : "text-primary/40"}`}>
                       {day.day}
                     </p>
                     {day.isActive && (
-                      <p className="text-xs text-muted truncate">
+                      <p className="text-[11px] font-medium tracking-wide text-primary/60 truncate mt-0.5">
                         {day.timeSlots
                           ? `Slots: ${day.timeSlots.join(", ")}`
                           : `${day.start} – ${day.end}`}
@@ -260,7 +260,7 @@ export default function AvailabilityEditor() {
                 {day.isActive && (
                   <button
                     onClick={() => openEditor(day)}
-                    className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-accent-dark transition-all duration-200 hover:bg-accent/10 active:scale-95"
+                    className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-accent-dark transition-all duration-300 hover:bg-accent hover:text-white active:scale-95 press-effect bg-accent/10"
                   >
                     Edit Times
                   </button>
@@ -276,24 +276,24 @@ export default function AvailabilityEditor() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="mt-1 rounded-lg border border-accent/20 bg-accent/5 p-4 space-y-3">
-                      <div className="flex items-center gap-2">
+                    <div className="mt-2 rounded-2xl border border-primary/10 bg-primary/5 p-5 space-y-4">
+                      <div className="flex items-center gap-2 bg-white/50 p-1 rounded-xl w-fit">
                         <button
                           onClick={() => setEditMode("range")}
-                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          className={`rounded-lg px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                             editMode === "range"
-                              ? "bg-accent text-white"
-                              : "bg-card text-muted hover:text-primary"
+                              ? "bg-accent text-white shadow-md"
+                              : "text-primary/60 hover:text-primary"
                           }`}
                         >
                           Time Range
                         </button>
                         <button
                           onClick={() => setEditMode("slots")}
-                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          className={`rounded-lg px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
                             editMode === "slots"
-                              ? "bg-accent text-white"
-                              : "bg-card text-muted hover:text-primary"
+                              ? "bg-accent text-white shadow-md"
+                              : "text-primary/60 hover:text-primary"
                           }`}
                         >
                           Custom Slots
@@ -301,13 +301,13 @@ export default function AvailabilityEditor() {
                       </div>
 
                       {editMode === "range" ? (
-                        <div className="flex gap-3 items-end">
+                        <div className="flex gap-4 items-end">
                           <div>
-                            <label className="mb-1 block text-xs text-muted">From</label>
+                            <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">From</label>
                             <select
                               value={editStart}
                               onChange={(e) => setEditStart(e.target.value)}
-                              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                              className="rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none"
                             >
                               {TIME_OPTIONS.map((t) => (
                                 <option key={t} value={t}>{t}</option>
@@ -315,11 +315,11 @@ export default function AvailabilityEditor() {
                             </select>
                           </div>
                           <div>
-                            <label className="mb-1 block text-xs text-muted">To</label>
+                            <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">To</label>
                             <select
                               value={editEnd}
                               onChange={(e) => setEditEnd(e.target.value)}
-                              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                              className="rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none"
                             >
                               {TIME_OPTIONS.map((t) => (
                                 <option key={t} value={t}>{t}</option>
@@ -328,13 +328,13 @@ export default function AvailabilityEditor() {
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {editSlots.map((slot, index) => (
-                            <div key={index} className="flex items-center gap-2">
+                            <div key={index} className="flex items-center gap-3">
                               <select
                                 value={slot}
                                 onChange={(e) => updateSlot(index, e.target.value)}
-                                className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-primary focus:border-accent focus:outline-none"
+                                className="rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none"
                               >
                                 {TIME_OPTIONS.map((t) => (
                                   <option key={t} value={t}>{t}</option>
@@ -342,7 +342,7 @@ export default function AvailabilityEditor() {
                               </select>
                               <button
                                 onClick={() => removeSlot(index)}
-                                className="rounded-lg px-2 py-2 text-xs text-red-500 hover:bg-red-50 transition-all active:scale-95"
+                                className="rounded-full px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95 bg-white border border-primary/10"
                               >
                                 Remove
                               </button>
@@ -350,24 +350,24 @@ export default function AvailabilityEditor() {
                           ))}
                           <button
                             onClick={addSlot}
-                            className="text-xs font-medium text-accent-dark hover:text-accent transition-all"
+                            className="text-[10px] font-bold uppercase tracking-widest text-accent-dark hover:text-accent transition-all mt-2 inline-block"
                           >
                             + Add time slot
                           </button>
                         </div>
                       )}
 
-                      <div className="flex gap-2 pt-1">
+                      <div className="flex gap-3 pt-4 border-t border-primary/10">
                         <button
                           onClick={saveDay}
                           disabled={saving === day.id}
-                          className="rounded-lg bg-accent px-4 py-1.5 text-xs font-medium text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50"
+                          className="rounded-full bg-accent px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50 shadow-md hover:-translate-y-1 hover:shadow-glow"
                         >
-                          {saving === day.id ? "..." : "Save"}
+                          {saving === day.id ? "..." : "Save Times"}
                         </button>
                         <button
                           onClick={() => setEditingDay(null)}
-                          className="rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-all hover:text-primary active:scale-95"
+                          className="rounded-full border border-primary/10 bg-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95"
                         >
                           Cancel
                         </button>
@@ -381,42 +381,42 @@ export default function AvailabilityEditor() {
         </div>
       </div>
 
-      <div>
-        <h2 className="font-serif text-xl font-bold text-primary">
+      <div className="pt-8 mt-8 border-t border-primary/10">
+        <h2 className="font-serif text-2xl font-bold text-primary">
           Blocked Dates
         </h2>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-primary/50">
           Add dates when you are unavailable (holidays, personal days)
         </p>
 
-        <div className="mt-4 space-y-3 rounded-lg border border-border bg-card p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="mt-6 space-y-4 rounded-3xl border border-primary/10 bg-primary/5 p-6 sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-muted">From date</label>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">From date</label>
               <input
                 type="date"
                 value={newBlocked.fromDate}
                 onChange={(e) =>
                   setNewBlocked({ ...newBlocked, fromDate: e.target.value })
                 }
-                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+                className="block w-full rounded-2xl border border-primary/10 bg-white px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
               />
             </div>
             <div className="flex-1">
-              <label className="mb-1 block text-xs font-medium text-muted">To date</label>
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">To date</label>
               <input
                 type="date"
                 value={newBlocked.toDate}
                 onChange={(e) =>
                   setNewBlocked({ ...newBlocked, toDate: e.target.value })
                 }
-                className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+                className="block w-full rounded-2xl border border-primary/10 bg-white px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
               />
             </div>
             <button
               onClick={addBlockedDate}
               disabled={adding || !newBlocked.fromDate}
-              className="w-full rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end"
+              className="w-full rounded-full bg-primary px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end shadow-md hover:-translate-y-1 hover:shadow-glow"
             >
               {adding ? "..." : "Add"}
             </button>
@@ -428,7 +428,7 @@ export default function AvailabilityEditor() {
               setNewBlocked({ ...newBlocked, reason: e.target.value })
             }
             placeholder="Reason (optional) – e.g. Holiday, Appointment"
-            className="block w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-primary focus:border-accent focus:outline-none"
+            className="block w-full rounded-2xl border border-primary/10 bg-white px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
           />
         </div>
 
@@ -437,22 +437,22 @@ export default function AvailabilityEditor() {
             {blockedDates.map((blocked) => (
               <div
                 key={blocked.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/5"
+                className="flex items-center justify-between rounded-2xl border border-primary/10 bg-white/50 p-5 transition-colors hover:bg-white"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-primary">
+                  <p className="text-sm font-bold text-primary">
                     {blocked.date}
                     {blocked.endDate && blocked.endDate !== blocked.date && (
                       <span> – {blocked.endDate}</span>
                     )}
                   </p>
                   {blocked.reason && (
-                    <p className="text-xs text-muted">{blocked.reason}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50 mt-1">{blocked.reason}</p>
                   )}
                 </div>
                 <button
                   onClick={() => removeBlockedDate(blocked.id)}
-                  className="shrink-0 rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-700 active:scale-95"
+                  className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-red-500 bg-red-50 transition-all duration-200 hover:bg-red-500 hover:text-white active:scale-95 press-effect"
                 >
                   Remove
                 </button>

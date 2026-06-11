@@ -24,10 +24,10 @@ interface BookingRow {
 }
 
 const statusStyles: Record<string, string> = {
-  Confirmed: "bg-green-100 text-green-700",
-  Pending: "bg-yellow-100 text-yellow-700",
-  Completed: "bg-blue-100 text-blue-700",
-  Cancelled: "bg-red-100 text-red-700",
+  Confirmed: "bg-green-50 text-green-700 border border-green-200",
+  Pending: "bg-yellow-50 text-yellow-700 border border-yellow-200",
+  Completed: "bg-blue-50 text-blue-700 border border-blue-200",
+  Cancelled: "bg-red-50 text-red-700 border border-red-200",
 }
 
 const statusDot: Record<string, string> = {
@@ -126,15 +126,15 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition-all duration-200 active:scale-95 ${
+            className={`rounded-full px-5 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 press-effect ${
               filter === f
-                ? "bg-accent text-primary shadow-sm"
-                : "border border-border text-muted hover:border-accent/30 hover:text-primary"
+                ? "bg-primary text-white shadow-md"
+                : "border border-primary/10 text-primary/70 hover:border-primary/30 hover:text-primary hover:bg-black/5"
             }`}
           >
             {f}
@@ -142,22 +142,22 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
         ))}
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-primary/10">
         <table className="hidden min-w-[700px] md:table w-full">
           <thead>
-            <tr className="bg-card text-left text-sm font-medium text-muted">
-              <th className="px-4 py-3">ID</th>
-              <th className="px-4 py-3">Client</th>
-              <th className="px-4 py-3">Service</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Deposit</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Actions</th>
+            <tr className="bg-primary/5 border-b border-primary/10 text-left text-[11px] font-bold uppercase tracking-widest text-primary/60">
+              <th className="px-6 py-4 whitespace-nowrap">ID</th>
+              <th className="px-6 py-4 whitespace-nowrap">Client</th>
+              <th className="px-6 py-4 whitespace-nowrap">Service</th>
+              <th className="px-6 py-4 whitespace-nowrap">Date</th>
+              <th className="px-6 py-4 whitespace-nowrap">Time</th>
+              <th className="px-6 py-4 whitespace-nowrap">Price</th>
+              <th className="px-6 py-4 whitespace-nowrap">Deposit</th>
+              <th className="px-6 py-4 whitespace-nowrap">Status</th>
+              <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-y divide-primary/5">
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={9} className="bg-card py-12 text-center text-sm text-muted">
@@ -166,51 +166,51 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
               </tr>
             ) : (
               filtered.map((booking) => (
-                <tr key={booking.id} className="bg-card text-sm transition-colors hover:bg-accent/5">
-                  <td className="px-4 py-3 font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-primary">{booking.client}</p>
-                    <p className="text-xs text-muted">{booking.email}</p>
+                <tr key={booking.id} className="text-sm transition-colors hover:bg-black/5">
+                  <td className="px-6 py-4 font-mono text-[11px] text-primary/50 tracking-wider">#{booking.id.slice(0, 8)}</td>
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-sm text-primary">{booking.client}</p>
+                    <p className="text-[11px] text-primary/50 font-medium">{booking.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-muted">{booking.service}</td>
-                  <td className="px-4 py-3 text-muted">{booking.date}</td>
-                  <td className="px-4 py-3 text-muted">{booking.time}</td>
-                  <td className="px-4 py-3 font-medium text-primary">£{booking.price}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.service}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.date}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.time}</td>
+                  <td className="px-6 py-4 font-bold text-primary">£{booking.price}</td>
+                  <td className="px-6 py-4">
                     {booking.depositPaid ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-green-600">
                         <CheckCircle className="h-3 w-3" /> Paid
                       </span>
                     ) : (
                       <button
                         onClick={() => handleMarkPaid(booking.id)}
                         disabled={processing === booking.id}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-accent-dark transition-colors hover:text-accent disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:text-accent disabled:opacity-50"
                       >
                         {processing === booking.id ? "..." : <><CreditCard className="h-3 w-3" /> Mark Paid</>}
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[booking.status]}`}>
+                  <td className="px-6 py-4">
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
                       {booking.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
                       {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                         <button
                           onClick={() => setCancelTarget(booking)}
                           disabled={processing === booking.id}
-                          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                         >
                           {processing === booking.id ? "..." : <><XCircle className="h-3 w-3" /> Cancel</>}
                         </button>
                       )}
                       <button
                         onClick={() => setViewing(booking)}
-                        className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 hover:text-accent"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:bg-accent/10 hover:text-accent"
                       >
                         <Eye className="h-3 w-3" /> View
                       </button>
@@ -224,31 +224,31 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
 
         <div className="block md:hidden">
           {filtered.length === 0 ? (
-            <div className="bg-card py-12 text-center text-sm text-muted">
+            <div className="py-12 text-center text-sm font-medium text-primary/50 uppercase tracking-widest">
               No bookings found
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-primary/5">
               {filtered.map((booking) => (
-                <div key={booking.id} className="bg-card px-4 py-4 transition-colors hover:bg-accent/5">
+                <div key={booking.id} className="px-4 py-6 transition-colors hover:bg-black/5">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1 space-y-2">
+                    <div className="min-w-0 flex-1 space-y-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs text-muted">#{booking.id.slice(0, 8)}</span>
+                        <span className="font-mono text-[11px] font-bold tracking-wider text-primary/50">#{booking.id.slice(0, 8)}</span>
                       </div>
                       <div>
-                        <p className="font-medium text-primary truncate">{booking.client}</p>
-                        <p className="text-xs text-muted truncate">{booking.service}</p>
+                        <p className="font-bold text-sm text-primary truncate">{booking.client}</p>
+                        <p className="text-[11px] font-medium text-primary/60 truncate">{booking.service}</p>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-muted">
+                      <div className="flex items-center gap-3 text-[11px] font-bold text-primary/60 tracking-wider">
                         <span>{booking.date}</span>
                         <span>{booking.time}</span>
-                        <span className="font-semibold text-primary">£{booking.price}</span>
+                        <span className="font-black text-primary">£{booking.price}</span>
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2.5">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${statusStyles[booking.status]}`}>
-                        <span className={`h-2 w-2 rounded-full ${statusDot[booking.status]}`} />
+                    <div className="flex shrink-0 flex-col items-end gap-3">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
                         {booking.status}
                       </span>
                       <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                           <button
                             onClick={() => handleMarkPaid(booking.id)}
                             disabled={processing === booking.id}
-                            className="rounded-lg bg-accent/10 px-3 py-2 text-xs font-medium text-accent-dark transition-all active:scale-95 disabled:opacity-50"
+                            className="rounded-lg bg-accent/10 px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-all active:scale-95 disabled:opacity-50"
                           >
                             {processing === booking.id ? "..." : "Mark Paid"}
                           </button>
@@ -264,14 +264,14 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                         {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                           <button
                             onClick={() => setCancelTarget(booking)}
-                            className="rounded-lg px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 active:scale-95"
+                            className="rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-red-500 transition-colors hover:bg-red-50 active:scale-95"
                           >
                             Cancel
                           </button>
                         )}
                         <button
                           onClick={() => setViewing(booking)}
-                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
+                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
                         >
                           View <ChevronRight className="h-3.5 w-3.5" />
                         </button>

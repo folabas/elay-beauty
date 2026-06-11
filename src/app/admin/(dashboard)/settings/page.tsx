@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
-import { Calendar, Link2, Link2Off, CheckCircle, AlertCircle } from "lucide-react"
+import { Calendar01Icon, Link01Icon, LinkUnlinkIcon, CheckmarkCircle01Icon, Alert01Icon } from "hugeicons-react"
 import { useEffect, useState } from "react"
 
 export default function SettingsPage() {
@@ -35,91 +35,96 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8 p-6">
+    <div className="mx-auto max-w-2xl space-y-8 p-6 lg:p-10 pb-32">
       <div>
-        <h1 className="font-serif text-2xl font-bold text-primary">Settings</h1>
-        <p className="mt-1 text-sm text-muted">Manage your admin account and integrations</p>
+        <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-primary">
+          Settings<span className="text-accent">.</span>
+        </h1>
+        <p className="mt-2 text-sm font-bold tracking-widest uppercase text-primary/50">Manage your admin account and integrations</p>
       </div>
 
       {success === "connected" && (
-        <div className="flex flex-wrap items-start gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
-          <span className="flex-1">Google Calendar connected successfully! New confirmed bookings will automatically appear on your calendar.</span>
-          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-green-700 underline transition-colors hover:bg-green-100">
+        <div className="flex flex-wrap items-start gap-4 rounded-3xl border border-green-200 bg-green-50 p-6 shadow-sm">
+          <CheckmarkCircle01Icon className="h-6 w-6 shrink-0 text-green-600" />
+          <span className="flex-1 text-sm font-medium text-green-800 leading-relaxed">
+            Google Calendar connected successfully! New confirmed bookings will automatically appear on your calendar.
+          </span>
+          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-green-700 underline transition-colors hover:bg-green-100">
             Dismiss
           </button>
         </div>
       )}
 
       {error && (
-        <div className="flex flex-wrap items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-          <span className="flex-1">
+        <div className="flex flex-wrap items-start gap-4 rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
+          <Alert01Icon className="h-6 w-6 shrink-0 text-red-600" />
+          <span className="flex-1 text-sm font-medium text-red-800 leading-relaxed">
             {error === "access_denied"
               ? "You denied the Google Calendar authorization request."
               : "Failed to connect Google Calendar. Please try again."}
           </span>
-          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-red-700 underline transition-colors hover:bg-red-100">
+          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-red-700 underline transition-colors hover:bg-red-100">
             Dismiss
           </button>
         </div>
       )}
 
-      <div className="rounded-xl border border-border bg-card p-6 shadow-soft">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent/10">
-            <Calendar className="h-6 w-6 text-accent-dark" />
+      <div className="glass-card rounded-[32px] border border-primary/10 p-6 sm:p-8 shadow-elevated">
+        <div className="flex flex-wrap items-center gap-5">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 shadow-sm relative overflow-hidden group">
+            <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Calendar01Icon size={28} className="text-accent" variant="stroke" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold text-primary">Google Calendar</h2>
-            <p className="text-sm text-muted">
+            <h2 className="text-xl font-bold text-primary mb-1">Google Calendar</h2>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50">
               Automatically create calendar events when bookings are confirmed
             </p>
           </div>
 
           {connected === null ? (
-            <div className="h-5 w-5 animate-pulse rounded-full bg-muted" />
+            <div className="h-6 w-6 animate-pulse rounded-full bg-primary/10" />
           ) : connected ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-green-600">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+              <span className="flex items-center gap-2 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                 Connected
               </span>
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-muted transition-all duration-200 hover:bg-red-50 hover:text-red-600 active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
               >
-                <Link2Off className="h-4 w-4" />
+                <LinkUnlinkIcon size={14} />
                 {disconnecting ? "Disconnecting..." : "Disconnect"}
               </button>
             </div>
           ) : (
             <a
               href="/api/auth/google-calendar"
-              className="flex items-center gap-1.5 rounded-lg bg-accent-dark px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-accent-dark/90 active:scale-95"
+              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
             >
-              <Link2 className="h-4 w-4" />
+              <Link01Icon size={16} />
               Connect
             </a>
           )}
         </div>
 
         {connected && (
-          <div className="mt-4 border-t border-border pt-4">
-            <h3 className="mb-2 text-sm font-medium text-primary">What happens next?</h3>
-            <ul className="space-y-1.5 text-sm text-muted">
-              <li className="flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-dark" />
-                When you mark a booking as <strong className="text-primary">deposit paid (confirmed)</strong>, a calendar event will be created automatically
+          <div className="mt-8 border-t border-primary/10 pt-8">
+            <h3 className="mb-4 font-serif text-lg font-bold text-primary">What happens next?</h3>
+            <ul className="space-y-4 text-sm font-medium text-primary/70">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                <span>When you mark a booking as <strong className="text-primary font-bold">deposit paid (confirmed)</strong>, a calendar event will be created automatically.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-dark" />
-                If you cancel a booking, the calendar event will be removed
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                <span>If you cancel a booking, the calendar event will be removed.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-dark" />
-                You will receive a <strong className="text-primary">popup + email reminder</strong> 30 minutes before each appointment
+              <li className="flex items-start gap-3">
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-accent" />
+                <span>You will receive a <strong className="text-primary font-bold">popup + email reminder</strong> 30 minutes before each appointment.</span>
               </li>
             </ul>
           </div>

@@ -4,25 +4,25 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
-  LayoutDashboard,
-  CalendarCheck,
-  CalendarRange,
-  Settings,
-  LogOut,
-  ExternalLink,
-  Menu,
-  X,
-  ShoppingBag,
-} from "lucide-react"
+  DashboardCircleIcon,
+  Calendar01Icon,
+  Calendar02Icon,
+  Settings01Icon,
+  Logout01Icon,
+  Link01Icon,
+  Menu01Icon,
+  Cancel01Icon,
+  Store01Icon,
+} from "hugeicons-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
-  { href: "/admin/services", label: "Services", icon: ShoppingBag },
-  { href: "/admin/availability", label: "Availability", icon: CalendarRange },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin", label: "Dashboard", icon: DashboardCircleIcon },
+  { href: "/admin/bookings", label: "Bookings", icon: Calendar01Icon },
+  { href: "/admin/services", label: "Services", icon: Store01Icon },
+  { href: "/admin/availability", label: "Availability", icon: Calendar02Icon },
+  { href: "/admin/settings", label: "Settings", icon: Settings01Icon },
 ]
 
 export default function AdminSidebar() {
@@ -41,28 +41,28 @@ export default function AdminSidebar() {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed left-4 top-4 z-50 rounded-lg border border-border bg-card p-3 text-muted shadow-soft transition-all duration-200 hover:bg-accent/5 hover:text-primary active:scale-95 lg:hidden"
+        className="fixed left-4 top-4 z-50 rounded-full border border-primary/10 bg-background/80 backdrop-blur-md p-3 text-primary/70 shadow-elevated transition-all duration-300 hover:text-primary active:scale-95 lg:hidden press-effect"
         aria-label="Toggle sidebar"
       >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {isOpen ? <Cancel01Icon size={20} /> : <Menu01Icon size={20} />}
       </button>
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-border bg-card transition-transform duration-300 ease-out lg:static lg:w-64 lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col glass-card border-r-0 border-primary/10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] lg:static lg:w-[280px] lg:translate-x-0 lg:my-6 lg:ml-6 lg:rounded-[32px] lg:border",
+          isOpen ? "translate-x-0 rounded-r-[32px] border-r" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-          <Link href="/admin" className="font-serif text-xl font-bold tracking-tight text-primary">
-            EL.AY<span className="text-accent">_</span>beauty
+        <div className="flex h-24 items-center gap-2 border-b border-primary/10 px-8">
+          <Link href="/admin" className="font-serif text-2xl font-bold tracking-tight text-primary">
+            EL.AY<span className="text-accent">_</span>
           </Link>
           <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-accent-dark">
             Admin
           </span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-2 px-4 py-6">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -72,33 +72,33 @@ export default function AdminSidebar() {
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 active:scale-[0.98]",
+                  "flex items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-medium transition-all duration-300 press-effect",
                   isActive
-                    ? "bg-accent/10 text-accent-dark"
-                    : "text-muted hover:bg-accent/5 hover:text-primary"
+                    ? "bg-primary text-white shadow-md"
+                    : "text-primary/70 hover:bg-black/5 hover:text-primary"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <Icon size={20} variant={isActive ? "solid" : "stroke"} />
                 {item.label}
               </Link>
             )
           })}
         </nav>
 
-        <div className="space-y-1 border-t border-border px-3 py-4">
+        <div className="space-y-2 border-t border-primary/10 px-4 py-6">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-muted transition-all duration-200 hover:bg-accent/5 hover:text-primary active:scale-[0.98]"
+            className="flex items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-medium text-primary/70 transition-all duration-300 hover:bg-black/5 hover:text-primary press-effect"
           >
-            <ExternalLink className="h-5 w-5" />
+            <Link01Icon size={20} />
             View Site
           </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-50 active:scale-[0.98]"
+            className="flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-[15px] font-medium text-red-500 transition-all duration-300 hover:bg-red-50 active:scale-[0.98] press-effect"
           >
-            <LogOut className="h-5 w-5" />
+            <Logout01Icon size={20} />
             Sign Out
           </button>
         </div>

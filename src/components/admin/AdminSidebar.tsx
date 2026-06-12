@@ -13,6 +13,7 @@ import {
   Menu01Icon,
   Cancel01Icon,
   Store01Icon,
+  UserGroupIcon,
 } from "hugeicons-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -20,6 +21,7 @@ import { useState, useEffect } from "react"
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: DashboardCircleIcon },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar01Icon },
+  { href: "/admin/customers", label: "Customers", icon: UserGroupIcon },
   { href: "/admin/services", label: "Services", icon: Store01Icon },
   { href: "/admin/availability", label: "Availability", icon: Calendar02Icon },
   { href: "/admin/settings", label: "Settings", icon: Settings01Icon },

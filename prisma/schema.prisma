@@ -31,6 +31,7 @@ model User {
   email     String    @unique
   phone     String?
   role      Role      @default(CLIENT)
+  discount  Float?
   bookings  Booking[]
   createdAt DateTime  @default(now())
 }
@@ -79,6 +80,7 @@ model Booking {
   notes              String?
   cancellationReason String?
   isStudent          Boolean       @default(false)
+  discountApplied    Float?
   googleEventId      String?
   createdAt          DateTime      @default(now())
 }

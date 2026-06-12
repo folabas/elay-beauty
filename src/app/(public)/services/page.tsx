@@ -41,6 +41,7 @@ const faqs = [
   { question: "What if the style I want isn't listed?", answer: "Send us a message on WhatsApp and we would be happy to discuss if we offer such services and how much it will cost." },
   { question: "Do you offer emergency or squeeze-in appointments?", answer: "Squeeze-in appointments are subject to availability and incur an additional £30 premium fee. Please message us on WhatsApp to inquire." },
   { question: "What is your privacy policy?", answer: "Your personal information is collected solely for the purpose of providing our services, processing bookings, and communicating with you. We do not share your data with third parties except where required by law. By booking with us, you consent to the collection and use of your information as described in our policy." },
+  { question: "Is my deposit refundable?", answer: "Your deposit fee counts towards your service charge. However, it is non-refundable if you cancel your booking within 48 hours of your appointment date or arrive more than 15 minutes late." },
 ]
 
 interface ServiceItem {

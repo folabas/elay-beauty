@@ -267,7 +267,7 @@ export default function ServicesPage() {
               <div className="relative">
                 {selectedService.imageUrl ? (
                   <div className="relative h-56 sm:h-72 w-full bg-primary/5">
-                    <img src={selectedService.imageUrl} alt={selectedService.name} className="h-full w-full object-cover" />
+                    <img src={selectedService.imageUrl} alt={selectedService.name} className="h-full w-full object-contain p-4" />
                   </div>
                 ) : (
                   <div className="h-32 sm:h-40 w-full bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center">

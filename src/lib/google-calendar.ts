@@ -29,11 +29,22 @@ export async function saveTokensFromCode(code: string): Promise<void> {
     throw new Error("No refresh token received. Make sure to authorize with prompt=consent.")
   }
 
+  oauth2Client.setCredentials(tokens)
+
+  let email: string | null = null
+  try {
+    const { data } = await google.oauth2("v2").userinfo.get({ auth: oauth2Client })
+    email = data.email ?? null
+  } catch {
+    // email not available
+  }
+
   const existing = await prisma.calendarToken.findFirst()
   const data = {
     accessToken: tokens.access_token!,
     refreshToken: tokens.refresh_token,
     expiryDate: new Date(Date.now() + (tokens.expiry_date ?? 3600 * 1000)),
+    email,
   }
 
   if (existing) {

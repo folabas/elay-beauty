@@ -9,6 +9,7 @@ function SettingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [connected, setConnected] = useState<boolean | null>(null)
+  const [calendarEmail, setCalendarEmail] = useState<string | null>(null)
   const [disconnecting, setDisconnecting] = useState(false)
 
   const success = searchParams.get("success")
@@ -17,7 +18,7 @@ function SettingsContent() {
   useEffect(() => {
     fetch("/api/auth/google-calendar/status")
       .then((r) => r.json())
-      .then((data) => setConnected(data.connected))
+      .then((data) => { setConnected(data.connected); setCalendarEmail(data.email) })
       .catch(() => setConnected(false))
   }, [])
 
@@ -90,6 +91,11 @@ function SettingsContent() {
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                 Connected
               </span>
+              {calendarEmail && (
+                <span className="text-[11px] font-medium text-primary/50 text-center sm:text-left truncate max-w-[200px]">
+                  {calendarEmail}
+                </span>
+              )}
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}

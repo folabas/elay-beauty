@@ -43,6 +43,7 @@ model Service {
   price            Float
   requiresHairInfo Boolean   @default(true)
   duration         Int?
+  durationRange    String?
   isActive         Boolean   @default(true)
   imageUrl         String?
   bookings         Booking[]

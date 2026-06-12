@@ -17,6 +17,7 @@ interface Service {
   description: string | null
   price: number
   duration: number | null
+  durationRange: string | null
   requiresHairInfo: boolean
   isActive: boolean
   imageUrl: string | null
@@ -35,7 +36,7 @@ export default function AdminServicesPage() {
     category: "BRAIDS",
     price: "",
     description: "",
-    duration: "",
+    durationRange: "",
     requiresHairInfo: true,
     imageUrl: "",
   })
@@ -63,7 +64,7 @@ export default function AdminServicesPage() {
   }
 
   const resetForm = () => {
-    setForm({ name: "", category: "BRAIDS", price: "", description: "", duration: "", requiresHairInfo: true, imageUrl: "" })
+    setForm({ name: "", category: "BRAIDS", price: "", description: "", durationRange: "", requiresHairInfo: true, imageUrl: "" })
     setEditingId(null)
     setShowForm(false)
   }
@@ -74,7 +75,7 @@ export default function AdminServicesPage() {
       category: service.category,
       price: String(service.price),
       description: service.description || "",
-      duration: service.duration ? String(service.duration) : "",
+      durationRange: service.durationRange || "",
       requiresHairInfo: service.requiresHairInfo,
       imageUrl: service.imageUrl || "",
     })
@@ -114,7 +115,7 @@ export default function AdminServicesPage() {
         category: form.category,
         price: parseFloat(form.price),
         description: form.description || null,
-        duration: form.duration ? parseInt(form.duration) : null,
+        durationRange: form.durationRange || null,
         requiresHairInfo: form.requiresHairInfo,
         imageUrl: form.imageUrl || null,
       }
@@ -195,7 +196,7 @@ export default function AdminServicesPage() {
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto pb-32">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-primary">
             Services<span className="text-accent">.</span>
@@ -204,7 +205,7 @@ export default function AdminServicesPage() {
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="rounded-full bg-primary px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-primary-light transition-all shadow-md hover:-translate-y-1 hover:shadow-glow"
+          className="w-full sm:w-auto rounded-full bg-primary px-6 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-white hover:bg-primary-light transition-all shadow-md hover:-translate-y-1 hover:shadow-glow"
         >
           Add Service
         </button>
@@ -254,11 +255,12 @@ export default function AdminServicesPage() {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Duration (hours)</label>
+                <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Duration</label>
                 <input
-                  type="number"
-                  value={form.duration}
-                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                  type="text"
+                  value={form.durationRange}
+                  onChange={(e) => setForm({ ...form, durationRange: e.target.value })}
+                  placeholder='e.g. "2 – 7 hrs"'
                   className="block w-full rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
                 />
               </div>
@@ -274,18 +276,20 @@ export default function AdminServicesPage() {
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Image</label>
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <label className="cursor-pointer rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95 shadow-sm">
-                      {uploading ? "Uploading..." : "Choose file"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className="hidden"
-                      />
-                    </label>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-primary/40">or paste URL</span>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div className="flex items-center gap-3">
+                      <label className="cursor-pointer rounded-xl border border-primary/10 bg-white px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95 shadow-sm">
+                        {uploading ? "Uploading..." : "Choose file"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-primary/40">or paste URL</span>
+                    </div>
                     <input
                       type="text"
                       value={form.imageUrl}
@@ -313,17 +317,17 @@ export default function AdminServicesPage() {
                 </label>
               </div>
             </div>
-            <div className="mt-8 flex gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={saveService}
                 disabled={saving || !form.name || !form.price}
-                className="rounded-full bg-accent px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50 shadow-md hover:-translate-y-1 hover:shadow-glow"
+                className="w-full sm:w-auto rounded-full bg-accent px-8 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50 shadow-md hover:-translate-y-1 hover:shadow-glow"
               >
                 {saving ? "..." : editingId ? "Update" : "Add Service"}
               </button>
               <button
                 onClick={resetForm}
-                className="rounded-full border border-primary/10 bg-white px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95 shadow-sm"
+                className="w-full sm:w-auto rounded-full border border-primary/10 bg-white px-8 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95 shadow-sm"
               >
                 Cancel
               </button>
@@ -343,13 +347,13 @@ export default function AdminServicesPage() {
                 {group.items.map((service) => (
                   <div
                     key={service.id}
-                    className={`flex items-center justify-between rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 ${
+                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 gap-3 ${
                       service.isActive ? "border-primary/10 bg-white/50" : "border-dashed border-primary/10 bg-white/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className="flex items-center gap-4 min-w-0 flex-1 w-full sm:w-auto">
                       {service.imageUrl && (
-                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-primary/10 shadow-sm">
+                        <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-primary/10 shadow-sm">
                           <img src={service.imageUrl} alt="" className="h-full w-full object-cover" />
                         </div>
                       )}
@@ -359,13 +363,13 @@ export default function AdminServicesPage() {
                         </p>
                         <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1">
                           £{service.price}
-                          {service.duration && <span> · {service.duration}h</span>}
+                          {service.durationRange && <span> · {service.durationRange}</span>}
                           {service.description && <span> · {service.description}</span>}
                           {!service.isActive && <span> · Disabled</span>}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
                       <button
                         onClick={() => toggleActive(service)}
                         className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 press-effect ${

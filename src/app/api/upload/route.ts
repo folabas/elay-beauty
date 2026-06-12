@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import path from "path"
-import os from "os"
+import { uploadToCloudinary } from "@/lib/cloudinary"
 
 export async function POST(request: Request) {
   try {
@@ -17,12 +15,10 @@ export async function POST(request: Request) {
 
     const ext = file.name.split(".").pop() || "jpg"
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const dir = path.join(os.tmpdir(), "uploads", "services")
 
-    await mkdir(dir, { recursive: true })
-    await writeFile(path.join(dir, filename), buffer)
+    const url = await uploadToCloudinary(buffer, filename)
 
-    return NextResponse.json({ url: `/api/uploads/${filename}` })
+    return NextResponse.json({ url })
   } catch (error) {
     console.error("Upload failed:", error)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })

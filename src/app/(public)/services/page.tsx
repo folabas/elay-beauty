@@ -6,9 +6,11 @@ import { useGSAP } from "@gsap/react"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import RotatingText from "@/components/ui/RotatingText"
 import Image from "next/image"
+import Link from "next/link"
 import { SERVICE_CATEGORIES } from "@/types"
-import { SparklesIcon, UserLove01Icon, UserSquareIcon, StudentIcon, PlusSignIcon } from "hugeicons-react"
+import { SparklesIcon, UserLove01Icon, UserSquareIcon, StudentIcon, PlusSignIcon, Cancel01Icon } from "hugeicons-react"
 import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
@@ -46,11 +48,13 @@ interface ServiceItem {
   description: string | null
   price: number
   imageUrl: string | null
+  durationRange: string | null
+  requiresHairInfo: boolean
 }
 
-function PriceCard({ name, price, note, imageUrl }: { name: string; price: number; note?: string; imageUrl?: string | null }) {
+function PriceCard({ name, price, note, imageUrl, onClick }: { name: string; price: number; note?: string; imageUrl?: string | null; onClick?: () => void }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect">
+    <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {imageUrl && (
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-primary/10 bg-background">
@@ -65,7 +69,7 @@ function PriceCard({ name, price, note, imageUrl }: { name: string; price: numbe
       <span className="whitespace-nowrap font-mono text-lg font-bold text-accent-dark pl-4">
         £{price}
       </span>
-    </div>
+    </button>
   )
 }
 
@@ -115,6 +119,7 @@ export default function ServicesPage() {
   }, { scope: containerRef, dependencies: [loading] })
 
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null)
 
   return (
     <div ref={containerRef} className="pb-32">
@@ -185,6 +190,7 @@ export default function ServicesPage() {
                             price={service.price}
                             note={service.description || undefined}
                             imageUrl={service.imageUrl}
+                            onClick={() => setSelectedService(service)}
                           />
                         ))
                       )}
@@ -241,6 +247,82 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+      <AnimatePresence>
+        {selectedService && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm"
+            onClick={() => setSelectedService(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-card w-full max-w-lg rounded-[32px] border border-primary/10 shadow-elevated overflow-hidden"
+            >
+              <div className="relative">
+                {selectedService.imageUrl ? (
+                  <div className="relative h-56 sm:h-72 w-full bg-primary/5">
+                    <img src={selectedService.imageUrl} alt={selectedService.name} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="h-32 sm:h-40 w-full bg-gradient-to-br from-accent/10 to-accent/5 flex items-center justify-center">
+                    <span className="text-4xl font-serif font-bold text-accent/30">{selectedService.name[0]}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => setSelectedService(null)}
+                  className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm text-primary/70 transition-colors hover:bg-white hover:text-primary shadow-sm"
+                >
+                  <Cancel01Icon size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 sm:p-8">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
+                    {selectedService.name}
+                  </h3>
+                  <span className="shrink-0 font-mono text-2xl font-bold text-accent-dark">
+                    £{selectedService.price}
+                  </span>
+                </div>
+
+                {selectedService.durationRange && (
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50 mb-3">
+                    Duration: {selectedService.durationRange}
+                  </p>
+                )}
+
+                {selectedService.description && (
+                  <p className="text-sm text-primary/70 leading-relaxed mb-6">
+                    {selectedService.description}
+                  </p>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href="/booking"
+                    className="flex-1 rounded-full bg-accent px-6 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white text-center transition-all hover:bg-accent-dark active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow"
+                  >
+                    Book Now
+                  </Link>
+                  <button
+                    onClick={() => setSelectedService(null)}
+                    className="flex-1 rounded-full border border-primary/10 bg-white px-6 py-3.5 text-[11px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95 shadow-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

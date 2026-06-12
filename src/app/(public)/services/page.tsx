@@ -215,7 +215,7 @@ export default function ServicesPage() {
           </div>
 
           <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6 text-sm font-medium text-amber-800 leading-relaxed">
-            <strong>Important:</strong> Please do not book a hairstyle and then request changes when we are making or about to start making the hair. This helps us serve you better and avoid disappointment.
+            <strong>Important:</strong> Please book your desired hairstyle carefully, as changes cannot be accommodated once we have started or are about to begin your appointment. This helps us serve you efficiently and avoid disappointment.
           </div>
 
           <div className="space-y-4">

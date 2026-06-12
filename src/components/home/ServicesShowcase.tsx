@@ -17,7 +17,7 @@ const categories = [
     title: "Braiding",
     description: "Knotless, box braids, and elegant cornrows tailored to protect and enhance your natural beauty.",
     image: "/images/braids_clay_illustration_1780950883300.png",
-    price: "From £55"
+    price: "From £40"
   },
   {
     title: "Natural Hair",

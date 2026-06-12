@@ -35,9 +35,9 @@ const categoryImages = {
 }
 
 const faqs = [
-  { question: "How long does knotless braiding usually take?", answer: "Depending on the length and size, knotless braids typically take between 4 to 7 hours. We recommend clearing your schedule for the day." },
-  { question: "Do I need to wash my hair before my appointment?", answer: "Yes, please come with your hair freshly washed, detangled, and blow-dried straight with no products added, unless you've booked our wash and blow-dry service." },
-  { question: "Is hair included in the braiding price?", answer: "No, hair extensions are not included. We will email you after booking to confirm the exact type and amount of hair you need to purchase." },
+  { question: "How long does knotless braiding usually take?", answer: "Depending on the length and size, knotless braids typically take between 8 to 12 hours. We recommend clearing your schedule for the day." },
+  { question: "Do I need to wash my hair before my appointment?", answer: "Yes, please come with your hair freshly washed, detangled, and blow-dried straight with no products added." },
+  { question: "Is hair included in the braiding price?", answer: "No, hair extensions are not included. We will text you after booking to confirm the exact type and amount of hair you need to purchase." },
   { question: "Do you offer emergency or squeeze-in appointments?", answer: "Squeeze-in appointments are subject to availability and incur an additional £30 premium fee. Please message us on WhatsApp to inquire." },
 ]
 

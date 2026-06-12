@@ -1,1 +1,2 @@
-ALTER TABLE CalendarToken ADD COLUMN email TEXT;
+-- AlterTable
+ALTER TABLE "CalendarToken" ADD COLUMN "email" TEXT;

@@ -266,7 +266,7 @@ export default function BookingPage() {
                 : "border border-primary/10 glass-card text-muted hover:border-accent/30"
             }`}
           >
-            {cat === "" ? "All" : cat === "BRAIDS" ? "Braids" : cat === "NATURAL" ? "Natural" : "Children"}
+            {cat === "" ? "All" : cat === "BRAIDS" ? "Braids" : cat === "NATURAL" ? "Natural" : "Children (12 years and below)"}
           </button>
         ))}
       </div>

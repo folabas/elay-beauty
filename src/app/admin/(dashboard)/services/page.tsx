@@ -7,7 +7,7 @@ const CATEGORIES = ["BRAIDS", "NATURAL", "CHILDREN"] as const
 const CATEGORY_LABELS: Record<string, string> = {
   BRAIDS: "Braids",
   NATURAL: "Natural Hair Styles",
-  CHILDREN: "Children's Styles",
+  CHILDREN: "Children (12 years and below)",
 }
 
 interface Service {

@@ -25,7 +25,7 @@ const categoryIcons = {
 const categoryDescriptions = {
   BRAIDS: "Professional braiding services for all lengths and styles, tailored to protect your natural hair.",
   NATURAL: "Styling for your natural hair with care and precision to nourish your texture.",
-  CHILDREN: "Gentle and stylish options for children of all ages, prioritizing comfort.",
+  CHILDREN: "Gentle and stylish options for children 12 years and below, prioritizing comfort.",
 }
 
 const categoryImages = {

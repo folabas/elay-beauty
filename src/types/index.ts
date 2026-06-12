@@ -37,7 +37,7 @@ export interface AvailabilityDay {
 export const SERVICE_CATEGORIES = {
   BRAIDS: "Braids",
   NATURAL: "Natural Hair Styles",
-  CHILDREN: "Children's Styles",
+  CHILDREN: "Children (12 years and below)",
 } as const
 
 export const PRICE_LIST = {

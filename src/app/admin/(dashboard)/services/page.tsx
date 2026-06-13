@@ -231,7 +231,7 @@ export default function AdminServicesPage() {
             initial={{ opacity: 0, y: -10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.97 }}
-            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto"
+            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-hidden"
           >
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">
               {editingId ? "Edit Service" : "New Service"}
@@ -398,7 +398,7 @@ export default function AdminServicesPage() {
 
       <div className="mt-8 space-y-10">
         {groupedServices.map((group) => (
-          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
+          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-hidden">
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">{group.label}</h2>
             {group.items.length === 0 ? (
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50 text-center py-8">No services in this category</p>
@@ -411,17 +411,17 @@ export default function AdminServicesPage() {
                       service.isActive ? "border-primary/10 bg-white/50" : "border-dashed border-primary/10 bg-white/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0 flex-1 w-full sm:w-auto">
+                    <div className="flex items-center gap-4 min-w-0 flex-1 w-full sm:w-auto overflow-hidden">
                       {service.imageUrl && (
                         <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-primary/10 shadow-sm">
                           <img src={service.imageUrl} alt="" className="h-full w-full object-cover" />
                         </div>
                       )}
-                      <div>
-                        <p className={`text-base font-bold ${service.isActive ? "text-primary" : "text-primary/50"}`}>
+                      <div className="min-w-0">
+                        <p className={`text-base font-bold truncate ${service.isActive ? "text-primary" : "text-primary/50"}`}>
                           {service.name}
                         </p>
-                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1 leading-relaxed whitespace-normal break-words">
+                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1 leading-relaxed break-words">
                           {service.pricingTier && service.pricingTier.length > 0
                             ? service.pricingTier.map((t) => `${t.name}: £${t.price}`).join(" · ")
                             : `£${service.price}`

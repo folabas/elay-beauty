@@ -127,7 +127,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex gap-3 overflow-x-auto">
         {["all", "pending", "confirmed", "completed", "cancelled"].map((f) => (
           <button
             key={f}

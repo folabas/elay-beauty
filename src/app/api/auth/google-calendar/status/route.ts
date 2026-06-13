@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { isCalendarConnected } from "@/lib/google-calendar"
+import { prisma } from "@/lib/prisma"
 
 export async function GET() {
-  const connected = await isCalendarConnected()
-  return NextResponse.json({ connected })
+  const token = await prisma.calendarToken.findFirst()
+  return NextResponse.json({ connected: !!token, email: token?.email ?? null })
 }

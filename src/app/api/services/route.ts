@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, category, price, description, duration, requiresHairInfo, imageUrl } = body
+    const { name, category, price, description, duration, durationRange, requiresHairInfo, imageUrl } = body
 
     if (!name || !category || price === undefined) {
       return NextResponse.json({ error: "Name, category, and price are required" }, { status: 400 })
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         duration: duration ? Number(duration) : null,
         requiresHairInfo: requiresHairInfo !== false,
         imageUrl: imageUrl || null,
+        durationRange: durationRange || null,
       },
     })
 
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, category, price, description, duration, requiresHairInfo, isActive, imageUrl } = body
+    const { id, name, category, price, description, duration, durationRange, requiresHairInfo, isActive, imageUrl } = body
 
     if (!id) {
       return NextResponse.json({ error: "Service ID is required" }, { status: 400 })
@@ -59,6 +60,7 @@ export async function PUT(request: Request) {
     if (requiresHairInfo !== undefined) data.requiresHairInfo = requiresHairInfo
     if (isActive !== undefined) data.isActive = isActive
     if (imageUrl !== undefined) data.imageUrl = imageUrl
+    if (durationRange !== undefined) data.durationRange = durationRange
 
     const service = await prisma.service.update({ where: { id }, data })
     return NextResponse.json(service)

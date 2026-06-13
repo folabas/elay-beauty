@@ -34,6 +34,8 @@ export default function BookingPage() {
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [isSunday, setIsSunday] = useState(false)
   const [dayFull, setDayFull] = useState(false)
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState<number | null>(null)
+  const [loyaltyCheckLoading, setLoyaltyCheckLoading] = useState(false)
   const stepContainerRef = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
@@ -76,7 +78,32 @@ export default function BookingPage() {
     fetchSlots()
   }, [selectedDate])
 
-  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string }[]>([])
+  useEffect(() => {
+    const email = formData.email.trim()
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setLoyaltyDiscount(null)
+      return
+    }
+
+    const timer = setTimeout(async () => {
+      setLoyaltyCheckLoading(true)
+      try {
+        const res = await fetch(`/api/users/discount?email=${encodeURIComponent(email)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setLoyaltyDiscount(data.discount ?? null)
+        }
+      } catch {
+        setLoyaltyDiscount(null)
+      } finally {
+        setLoyaltyCheckLoading(false)
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [formData.email])
+
+  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string; imageUrl: string | null }[]>([])
 
   useEffect(() => {
     async function load() {
@@ -84,11 +111,15 @@ export default function BookingPage() {
         const res = await fetch("/api/services")
         if (res.ok) {
           const data = await res.json()
-          setAllServices(data.map((s: { name: string; price: number; category: string; id: string }) => ({ ...s, category: s.category })))
+          setAllServices(data.map((s: { name: string; price: number; category: string; id: string; imageUrl: string | null }) => ({ name: s.name, price: s.price, category: s.category, id: s.id, imageUrl: s.imageUrl })))
         }
       } catch { /* ignore */ }
     }
     load()
+
+    const params = new URLSearchParams(window.location.search)
+    const category = params.get("category")
+    if (category) setSelectedCategory(category)
   }, [])
 
   const filteredServices = selectedCategory
@@ -145,6 +176,7 @@ export default function BookingPage() {
           hairType: formData.hairType || undefined,
           notes: formData.notes || undefined,
           isStudent: formData.isStudent,
+          discountApplied: loyaltyDiscount,
           totalPrice: finalPrice,
         }),
       })
@@ -166,9 +198,12 @@ export default function BookingPage() {
   }
 
   const totalPrice = selectedService?.price ?? 0
-  const finalPrice = formData.isStudent && ["BRAIDS", "NATURAL"].includes(selectedCategory)
+  const priceAfterStudent = formData.isStudent && ["BRAIDS", "NATURAL"].includes(selectedCategory)
     ? totalPrice * 0.8
     : totalPrice
+  const finalPrice = loyaltyDiscount
+    ? Math.round(priceAfterStudent * (1 - loyaltyDiscount / 100) * 100) / 100
+    : priceAfterStudent
   const depositRequired = true
 
   const renderProgress = () => {
@@ -235,7 +270,7 @@ export default function BookingPage() {
                 : "border border-primary/10 glass-card text-muted hover:border-accent/30"
             }`}
           >
-            {cat === "" ? "All" : cat === "BRAIDS" ? "Braids" : cat === "NATURAL" ? "Natural" : "Children"}
+            {cat === "" ? "All" : cat === "BRAIDS" ? "Braids" : cat === "NATURAL" ? "Natural" : "Children (12 years and below)"}
           </button>
         ))}
       </div>
@@ -252,9 +287,9 @@ export default function BookingPage() {
             }`}
           >
             <div className="flex items-center gap-3">
-              {SERVICE_IMAGES[service.name] && (
+              {(service.imageUrl || SERVICE_IMAGES[service.name]) && (
                 <img
-                  src={SERVICE_IMAGES[service.name]}
+                  src={service.imageUrl || SERVICE_IMAGES[service.name]}
                   alt={service.name}
                   className="h-10 w-10 shrink-0 rounded-md object-cover"
                 />
@@ -292,7 +327,7 @@ export default function BookingPage() {
               <>
                 {isSunday && (
                   <p className="mb-2 text-xs text-accent-dark">
-                    Sunday: only Cornrows and Crotchet available
+                    Sundays are reserved exclusively for hairstyles under the natural hair section
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -364,6 +399,14 @@ export default function BookingPage() {
             placeholder="jane@example.com"
           />
           {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+          {loyaltyCheckLoading && (
+            <p className="mt-1 text-xs text-accent-dark">Checking loyalty...</p>
+          )}
+          {!loyaltyCheckLoading && loyaltyDiscount && (
+            <p className="mt-1 text-xs text-accent-dark font-medium">
+              ✓ You qualify for a {loyaltyDiscount}% loyalty discount!
+            </p>
+          )}
         </div>
 
         <div>
@@ -403,7 +446,6 @@ export default function BookingPage() {
               <option value="">Select...</option>
               <option value="natural">Natural</option>
               <option value="relaxed">Relaxed</option>
-              <option value="short">Short Hair</option>
               <option value="other">Other</option>
             </select>
           </div>
@@ -457,6 +499,9 @@ export default function BookingPage() {
     ]
     if (formData.isStudent) {
       priceBreakdown.push({ label: "Student Discount (20%)", amount: -(totalPrice * 0.2) })
+    }
+    if (loyaltyDiscount) {
+      priceBreakdown.push({ label: `Loyalty Discount (${loyaltyDiscount}%)`, amount: -(priceAfterStudent * loyaltyDiscount / 100) })
     }
 
     return (
@@ -684,6 +729,7 @@ export default function BookingPage() {
             notes: "",
             isStudent: false,
           })
+          setLoyaltyDiscount(null)
           setEmailWarnings([])
         }}
         className="mt-8 rounded-xl bg-primary px-6 py-3 shadow-elevated press-effect text-sm font-medium text-white hover:bg-primary-light"

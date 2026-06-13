@@ -2,13 +2,14 @@
 
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
-import { Calendar01Icon, Link01Icon, LinkUnlinkIcon, CheckmarkCircle01Icon, Alert01Icon } from "hugeicons-react"
-import { useEffect, useState } from "react"
+import { Calendar01Icon, Link01Icon, Unlink01Icon, CheckmarkCircle01Icon, Alert01Icon } from "hugeicons-react"
+import { useEffect, useState, Suspense } from "react"
 
-export default function SettingsPage() {
+function SettingsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [connected, setConnected] = useState<boolean | null>(null)
+  const [calendarEmail, setCalendarEmail] = useState<string | null>(null)
   const [disconnecting, setDisconnecting] = useState(false)
 
   const success = searchParams.get("success")
@@ -17,7 +18,7 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch("/api/auth/google-calendar/status")
       .then((r) => r.json())
-      .then((data) => setConnected(data.connected))
+      .then((data) => { setConnected(data.connected); setCalendarEmail(data.email) })
       .catch(() => setConnected(false))
   }, [])
 
@@ -44,36 +45,36 @@ export default function SettingsPage() {
       </div>
 
       {success === "connected" && (
-        <div className="flex flex-wrap items-start gap-4 rounded-3xl border border-green-200 bg-green-50 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start gap-3 rounded-3xl border border-green-200 bg-green-50 p-5 sm:p-6 shadow-sm">
           <CheckmarkCircle01Icon className="h-6 w-6 shrink-0 text-green-600" />
           <span className="flex-1 text-sm font-medium text-green-800 leading-relaxed">
             Google Calendar connected successfully! New confirmed bookings will automatically appear on your calendar.
           </span>
-          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-green-700 underline transition-colors hover:bg-green-100">
+          <button onClick={() => router.replace("/admin/settings")} className="w-full sm:w-auto shrink-0 rounded-full px-4 py-3 sm:py-2 text-[10px] font-bold uppercase tracking-widest text-green-700 underline transition-colors hover:bg-green-100">
             Dismiss
           </button>
         </div>
       )}
 
       {error && (
-        <div className="flex flex-wrap items-start gap-4 rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start gap-3 rounded-3xl border border-red-200 bg-red-50 p-5 sm:p-6 shadow-sm">
           <Alert01Icon className="h-6 w-6 shrink-0 text-red-600" />
           <span className="flex-1 text-sm font-medium text-red-800 leading-relaxed">
             {error === "access_denied"
               ? "You denied the Google Calendar authorization request."
               : "Failed to connect Google Calendar. Please try again."}
           </span>
-          <button onClick={() => router.replace("/admin/settings")} className="shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-red-700 underline transition-colors hover:bg-red-100">
+          <button onClick={() => router.replace("/admin/settings")} className="w-full sm:w-auto shrink-0 rounded-full px-4 py-3 sm:py-2 text-[10px] font-bold uppercase tracking-widest text-red-700 underline transition-colors hover:bg-red-100">
             Dismiss
           </button>
         </div>
       )}
 
       <div className="glass-card rounded-[32px] border border-primary/10 p-6 sm:p-8 shadow-elevated">
-        <div className="flex flex-wrap items-center gap-5">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 shadow-sm relative overflow-hidden group">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 shadow-sm relative overflow-hidden group">
             <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Calendar01Icon size={28} className="text-accent" variant="stroke" />
+            <Calendar01Icon className="size-[22px] sm:size-[28px] text-accent" variant="stroke" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-xl font-bold text-primary mb-1">Google Calendar</h2>
@@ -85,24 +86,29 @@ export default function SettingsPage() {
           {connected === null ? (
             <div className="h-6 w-6 animate-pulse rounded-full bg-primary/10" />
           ) : connected ? (
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-              <span className="flex items-center gap-2 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+              <span className="flex items-center justify-center sm:justify-start gap-2 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                 Connected
               </span>
+              {calendarEmail && (
+                <span className="text-[11px] font-medium text-primary/50 text-center sm:text-left truncate max-w-[200px]">
+                  {calendarEmail}
+                </span>
+              )}
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="flex items-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
+                className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
               >
-                <LinkUnlinkIcon size={14} />
+                <Unlink01Icon size={14} />
                 {disconnecting ? "Disconnecting..." : "Disconnect"}
               </button>
             </div>
           ) : (
             <a
               href="/api/auth/google-calendar"
-              className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
             >
               <Link01Icon size={16} />
               Connect
@@ -131,5 +137,13 @@ export default function SettingsPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="p-6"><div className="h-5 w-5 animate-pulse rounded-full bg-muted" /></div>}>
+      <SettingsContent />
+    </Suspense>
   )
 }

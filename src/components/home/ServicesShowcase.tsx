@@ -8,6 +8,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight01Icon } from "hugeicons-react"
 
+const categoryLinks: Record<string, string> = {
+  "Braiding": "/booking?category=BRAIDS",
+  "Natural Hair": "/booking?category=NATURAL",
+  "Children's Hair": "/booking?category=CHILDREN",
+}
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger)
 }
@@ -17,13 +23,13 @@ const categories = [
     title: "Braiding",
     description: "Knotless, box braids, and elegant cornrows tailored to protect and enhance your natural beauty.",
     image: "/images/braids_clay_illustration_1780950883300.png",
-    price: "From £55"
+    price: "From £40"
   },
   {
     title: "Natural Hair",
     description: "Silk presses, wash & blow dry, and natural styling designed to nourish your texture.",
     image: "/images/natural_clay_illustration_1780950900942.png",
-    price: "From £15"
+    price: "From £20"
   },
   {
     title: "Children's Hair",
@@ -95,7 +101,7 @@ export default function ServicesShowcase() {
                   <span className="font-mono text-accent-dark font-bold bg-accent/10 px-4 py-1.5 rounded-full text-xs border border-accent/20">
                     {cat.price}
                   </span>
-                  <Link href="/services" className="w-12 h-12 rounded-full glass-pill flex items-center justify-center text-primary border border-primary/10 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-300 hover:scale-105 shadow-sm">
+                  <Link href={categoryLinks[cat.title] || "/booking"} className="w-12 h-12 rounded-full glass-pill flex items-center justify-center text-primary border border-primary/10 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all duration-300 hover:scale-105 shadow-sm">
                     <ArrowRight01Icon size={20} />
                   </Link>
                 </div>

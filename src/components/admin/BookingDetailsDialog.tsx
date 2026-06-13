@@ -8,6 +8,7 @@ interface BookingDetails {
   id: string
   client: string
   email: string
+  phone?: string | null
   service: string
   hairLength?: string | null
   hairType?: string | null
@@ -89,6 +90,7 @@ export default function BookingDetailsDialog({ booking, onClose }: BookingDetail
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Client</span>
                 <p className="mt-0.5 font-medium text-primary">{booking.client}</p>
                 <p className="text-xs text-muted break-all">{booking.email}</p>
+                {booking.phone && <p className="text-xs text-muted">{booking.phone}</p>}
               </div>
               <div>
                 <span className="text-xs font-medium uppercase tracking-wider text-muted">Service</span>

@@ -16,6 +16,7 @@ export default async function AdminBookingsPage() {
     id: b.id,
     client: b.client.name,
     email: b.client.email,
+    phone: b.client.phone,
     service: b.service.name,
     hairLength: b.hairLength,
     hairType: b.hairType,

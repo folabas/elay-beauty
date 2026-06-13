@@ -116,6 +116,10 @@ export default function BookingPage() {
       } catch { /* ignore */ }
     }
     load()
+
+    const params = new URLSearchParams(window.location.search)
+    const category = params.get("category")
+    if (category) setSelectedCategory(category)
   }, [])
 
   const filteredServices = selectedCategory

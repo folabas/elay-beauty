@@ -69,19 +69,19 @@ function PriceCard({ name, price, pricingTier, note, imageUrl, onClick }: { name
     ? `£${Math.min(...pricingTier.map(t => t.price))} - £${Math.max(...pricingTier.map(t => t.price))}`
     : `£${price}`
   return (
-    <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+    <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left overflow-hidden">
+      <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
         {imageUrl && (
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-primary/10 bg-background">
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <p className="font-medium text-primary text-sm sm:text-base truncate">{name}</p>
-          {note && <p className="mt-1 text-xs text-primary/60">{note}</p>}
+          {note && <p className="mt-1 text-xs text-primary/60 break-words">{note}</p>}
         </div>
       </div>
-      <span className="whitespace-nowrap font-mono text-lg font-bold text-accent-dark pl-4">
+      <span className="shrink-0 font-mono text-lg font-bold text-accent-dark pl-4">
         {displayPrice}
       </span>
     </button>
@@ -175,7 +175,7 @@ export default function ServicesPage() {
                   id={category.toLowerCase()}
                   className="stack-section pt-4 mb-16 last:mb-10"
                 >
-                  <div className="w-full glass-card p-6 sm:p-12 border-t border-primary/10 shadow-elevated grid lg:grid-cols-[1fr_2fr] gap-12 items-start bg-white/70">
+                  <div className="w-full glass-card p-6 sm:p-12 border-t border-primary/10 shadow-elevated grid lg:grid-cols-[1fr_2fr] gap-12 items-start bg-white/70 overflow-hidden">
                     <div className="lg:sticky lg:top-32">
                       <div className="mb-6 flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-glow">

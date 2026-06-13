@@ -10,6 +10,7 @@ interface BookingRow {
   id: string
   client: string
   email: string
+  phone?: string | null
   service: string
   date: string
   time: string
@@ -171,11 +172,15 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                   <td className="px-6 py-4">
                     <p className="font-bold text-sm text-primary">{booking.client}</p>
                     <p className="text-[11px] text-primary/50 font-medium">{booking.email}</p>
+                    {booking.phone && <p className="text-[11px] text-primary/40">{booking.phone}</p>}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.service}</td>
                   <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.date}</td>
                   <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.time}</td>
-                  <td className="px-6 py-4 font-bold text-primary">£{booking.price}</td>
+                  <td className="px-6 py-4 font-bold text-primary">
+                    £{booking.price}
+                    {booking.isStudent && <span className="ml-2 inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
+                  </td>
                   <td className="px-6 py-4">
                     {booking.depositPaid ? (
                       <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-green-600">
@@ -239,11 +244,13 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                       <div>
                         <p className="font-bold text-sm text-primary truncate">{booking.client}</p>
                         <p className="text-[11px] font-medium text-primary/60 truncate">{booking.service}</p>
+                        {booking.phone && <p className="text-[11px] text-primary/40">{booking.phone}</p>}
                       </div>
                       <div className="flex items-center gap-3 text-[11px] font-bold text-primary/60 tracking-wider">
                         <span>{booking.date}</span>
                         <span>{booking.time}</span>
                         <span className="font-black text-primary">£{booking.price}</span>
+                        {booking.isStudent && <span className="ml-2 inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-3">

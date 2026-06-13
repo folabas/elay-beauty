@@ -327,7 +327,7 @@ export default function BookingPage() {
               <>
                 {isSunday && (
                   <p className="mb-2 text-xs text-accent-dark">
-                    Sunday: only Cornrows and Crotchet available
+                    Sundays are reserved exclusively for hairstyles under the natural hair section
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -446,7 +446,6 @@ export default function BookingPage() {
               <option value="">Select...</option>
               <option value="natural">Natural</option>
               <option value="relaxed">Relaxed</option>
-              <option value="short">Short Hair</option>
               <option value="other">Other</option>
             </select>
           </div>

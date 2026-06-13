@@ -7,7 +7,7 @@
     "build": "prisma generate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "vercel-build": "prisma migrate deploy && prisma generate && next build --webpack"
+    "vercel-build": "npx prisma migrate resolve --applied 20260613120000_add_service_sizes_and_gallery 2>/dev/null; prisma migrate deploy && prisma generate && next build --webpack"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

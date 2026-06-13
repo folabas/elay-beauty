@@ -44,6 +44,7 @@ const faqs = [
   { question: "Is my deposit refundable?", answer: "Your deposit fee counts towards your service charge. Cancellations made more than 48 hours before your appointment will receive a full refund of your deposit. Cancellations made within 48 hours will result in a non-refundable deposit." },
   { question: "Are there any late fee charges?", answer: "Yes, arriving more than 15 minutes late to your appointment will incur a £10 late fee." },
   { question: "Are prices negotiable?", answer: "No, all prices are fixed and non-negotiable." },
+  { question: "Can I make amendments to my booking prior to my appointment?", answer: "If you wish to make changes to your booking, please send us a message on WhatsApp. Please note that amendments may result in additional charges or a reduced cost depending on the service selected." },
 ]
 
 interface ServiceItem {

@@ -19,7 +19,7 @@ const steps = [
   {
     icon: Calendar01Icon,
     title: "Pick a Time",
-    desc: "Select a date and time that works for you. Note that Sundays are reserved exclusively for Cornrows and Crotchet.",
+    desc: "Select a date and time that works for you. Note that Sundays are reserved exclusively for hairstyles under the natural hair section.",
   },
   {
     icon: CheckmarkBadge01Icon,

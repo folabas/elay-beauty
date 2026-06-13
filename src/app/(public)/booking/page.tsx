@@ -103,7 +103,7 @@ export default function BookingPage() {
     return () => clearTimeout(timer)
   }, [formData.email])
 
-  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string }[]>([])
+  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string; imageUrl: string | null }[]>([])
 
   useEffect(() => {
     async function load() {
@@ -111,7 +111,7 @@ export default function BookingPage() {
         const res = await fetch("/api/services")
         if (res.ok) {
           const data = await res.json()
-          setAllServices(data.map((s: { name: string; price: number; category: string; id: string }) => ({ ...s, category: s.category })))
+          setAllServices(data.map((s: { name: string; price: number; category: string; id: string; imageUrl: string | null }) => ({ name: s.name, price: s.price, category: s.category, id: s.id, imageUrl: s.imageUrl })))
         }
       } catch { /* ignore */ }
     }
@@ -283,9 +283,9 @@ export default function BookingPage() {
             }`}
           >
             <div className="flex items-center gap-3">
-              {SERVICE_IMAGES[service.name] && (
+              {(service.imageUrl || SERVICE_IMAGES[service.name]) && (
                 <img
-                  src={SERVICE_IMAGES[service.name]}
+                  src={service.imageUrl || SERVICE_IMAGES[service.name]}
                   alt={service.name}
                   className="h-10 w-10 shrink-0 rounded-md object-cover"
                 />

@@ -390,33 +390,33 @@ export default function AvailabilityEditor() {
         </p>
 
         <div className="mt-6 space-y-4 rounded-3xl border border-primary/10 bg-primary/5 p-6 sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">From date</label>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-end">
+            <div className="col-span-1">
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">From</label>
               <input
                 type="date"
                 value={newBlocked.fromDate}
                 onChange={(e) =>
                   setNewBlocked({ ...newBlocked, fromDate: e.target.value })
                 }
-                className="block w-full rounded-2xl border border-primary/10 bg-white px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
+                className="block w-full rounded-xl border border-primary/10 bg-white px-3 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
               />
             </div>
-            <div className="flex-1">
-              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">To date</label>
+            <div className="col-span-1">
+              <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-primary/60">To</label>
               <input
                 type="date"
                 value={newBlocked.toDate}
                 onChange={(e) =>
                   setNewBlocked({ ...newBlocked, toDate: e.target.value })
                 }
-                className="block w-full rounded-2xl border border-primary/10 bg-white px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
+                className="block w-full rounded-xl border border-primary/10 bg-white px-3 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
               />
             </div>
             <button
               onClick={addBlockedDate}
               disabled={adding || !newBlocked.fromDate}
-              className="w-full rounded-full bg-primary px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end shadow-md hover:-translate-y-1 hover:shadow-glow"
+              className="col-span-2 rounded-full bg-primary px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-primary-light active:scale-95 disabled:opacity-50 sm:w-auto sm:self-end shadow-md hover:-translate-y-1 hover:shadow-glow"
             >
               {adding ? "..." : "Add"}
             </button>

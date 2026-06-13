@@ -147,15 +147,15 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
         <table className="hidden min-w-[700px] md:table w-full">
           <thead>
             <tr className="bg-primary/5 border-b border-primary/10 text-left text-[11px] font-bold uppercase tracking-widest text-primary/60">
-              <th className="px-6 py-4 whitespace-nowrap">ID</th>
-              <th className="px-6 py-4 whitespace-nowrap">Client</th>
-              <th className="px-6 py-4 whitespace-nowrap">Service</th>
-              <th className="px-6 py-4 whitespace-nowrap">Date</th>
-              <th className="px-6 py-4 whitespace-nowrap">Time</th>
-              <th className="px-6 py-4 whitespace-nowrap">Price</th>
-              <th className="px-6 py-4 whitespace-nowrap">Deposit</th>
-              <th className="px-6 py-4 whitespace-nowrap">Status</th>
-              <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
+              <th className="px-4 py-3 whitespace-nowrap">ID</th>
+              <th className="px-4 py-3 whitespace-nowrap">Client</th>
+              <th className="px-4 py-3 whitespace-nowrap">Service</th>
+              <th className="px-4 py-3 whitespace-nowrap">Date</th>
+              <th className="px-4 py-3 whitespace-nowrap">Time</th>
+              <th className="px-4 py-3 whitespace-nowrap">Price</th>
+              <th className="px-4 py-3 whitespace-nowrap">Deposit</th>
+              <th className="px-4 py-3 whitespace-nowrap">Status</th>
+              <th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-primary/5">
@@ -168,56 +168,58 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
             ) : (
               filtered.map((booking) => (
                 <tr key={booking.id} className="text-sm transition-colors hover:bg-black/5">
-                  <td className="px-6 py-4 font-mono text-[11px] text-primary/50 tracking-wider">#{booking.id.slice(0, 8)}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3 font-mono text-[11px] text-primary/50 tracking-wider">#{booking.id.slice(0, 8)}</td>
+                  <td className="px-4 py-3">
                     <p className="font-bold text-sm text-primary">{booking.client}</p>
                     <p className="text-[11px] text-primary/50 font-medium">{booking.email}</p>
                     {booking.phone && <p className="text-[11px] text-primary/40">{booking.phone}</p>}
                   </td>
-                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.service}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.date}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-primary/80">{booking.time}</td>
-                  <td className="px-6 py-4 font-bold text-primary">
+                  <td className="px-4 py-3 text-sm font-medium text-primary/80 max-w-[140px] truncate">{booking.service}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-primary/80 whitespace-nowrap">{booking.date}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-primary/80">{booking.time}</td>
+                  <td className="px-4 py-3 font-bold text-primary whitespace-nowrap">
                     £{booking.price}
-                    {booking.isStudent && <span className="ml-2 inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
+                    {booking.isStudent && <span className="ml-1.5 inline-flex items-center rounded-full bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 py-3">
                     {booking.depositPaid ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-green-600">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-green-600">
                         <CheckCircle className="h-3 w-3" /> Paid
                       </span>
                     ) : (
                       <button
                         onClick={() => handleMarkPaid(booking.id)}
                         disabled={processing === booking.id}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:text-accent disabled:opacity-50"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:text-accent disabled:opacity-50"
                       >
-                        {processing === booking.id ? "..." : <><CreditCard className="h-3 w-3" /> Mark Paid</>}
+                        {processing === booking.id ? "..." : <><CreditCard className="h-3 w-3" /> Pay</>}
                       </button>
                     )}
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
                       {booking.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
                       {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                         <button
                           onClick={() => setCancelTarget(booking)}
                           disabled={processing === booking.id}
-                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                          className="rounded-lg p-2 text-red-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                          title="Cancel booking"
                         >
-                          {processing === booking.id ? "..." : <><XCircle className="h-3 w-3" /> Cancel</>}
+                          {processing === booking.id ? <span className="text-[10px]">...</span> : <XCircle className="h-4 w-4" />}
                         </button>
                       )}
                       <button
                         onClick={() => setViewing(booking)}
-                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:bg-accent/10 hover:text-accent"
+                        className="rounded-lg p-2 text-accent-dark transition-colors hover:bg-accent/10"
+                        title="View details"
                       >
-                        <Eye className="h-3 w-3" /> View
+                        <Eye className="h-4 w-4" />
                       </button>
                     </div>
                   </td>
@@ -235,52 +237,52 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
           ) : (
             <div className="divide-y divide-primary/5">
               {filtered.map((booking) => (
-                <div key={booking.id} className="px-4 py-6 transition-colors hover:bg-black/5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1 space-y-3">
+                <div key={booking.id} className="px-4 py-5 transition-colors hover:bg-black/5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[11px] font-bold tracking-wider text-primary/50">#{booking.id.slice(0, 8)}</span>
+                        <span className="font-mono text-[10px] font-bold tracking-wider text-primary/40">#{booking.id.slice(0, 8)}</span>
                       </div>
-                      <div>
-                        <p className="font-bold text-sm text-primary truncate">{booking.client}</p>
-                        <p className="text-[11px] font-medium text-primary/60 truncate">{booking.service}</p>
-                        {booking.phone && <p className="text-[11px] text-primary/40">{booking.phone}</p>}
-                      </div>
-                      <div className="flex items-center gap-3 text-[11px] font-bold text-primary/60 tracking-wider">
+                      <p className="font-bold text-sm text-primary truncate">{booking.client}</p>
+                      <p className="text-[11px] font-medium text-primary/60 truncate">{booking.service}</p>
+                      {booking.phone && <p className="text-[10px] text-primary/40">{booking.phone}</p>}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-primary/60 tracking-wider">
                         <span>{booking.date}</span>
                         <span>{booking.time}</span>
                         <span className="font-black text-primary">£{booking.price}</span>
-                        {booking.isStudent && <span className="ml-2 inline-flex items-center rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
+                        {booking.isStudent && <span className="inline-flex items-center rounded-full bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-dark">Student</span>}
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-3">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${statusStyles[booking.status]}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${statusDot[booking.status]}`} />
                         {booking.status}
                       </span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         {!booking.depositPaid && booking.status !== "Cancelled" && booking.status !== "Completed" && (
                           <button
                             onClick={() => handleMarkPaid(booking.id)}
                             disabled={processing === booking.id}
-                            className="rounded-lg bg-accent/10 px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-all active:scale-95 disabled:opacity-50"
+                            className="rounded-lg bg-accent/10 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-accent-dark transition-all active:scale-95 disabled:opacity-50"
                           >
-                            {processing === booking.id ? "..." : "Mark Paid"}
+                            {processing === booking.id ? "..." : "Pay"}
                           </button>
                         )}
                         {booking.status !== "Cancelled" && booking.status !== "Completed" && (
                           <button
                             onClick={() => setCancelTarget(booking)}
-                            className="rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-red-500 transition-colors hover:bg-red-50 active:scale-95"
+                            className="rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50 active:scale-95"
+                            title="Cancel"
                           >
-                            Cancel
+                            <XCircle className="h-4 w-4" />
                           </button>
                         )}
                         <button
                           onClick={() => setViewing(booking)}
-                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
+                          className="rounded-lg p-1.5 text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
+                          title="View"
                         >
-                          View <ChevronRight className="h-3.5 w-3.5" />
+                          <Eye className="h-4 w-4" />
                         </button>
                       </div>
                     </div>

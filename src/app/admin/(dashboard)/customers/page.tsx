@@ -91,7 +91,7 @@ export default function AdminCustomersPage() {
         </span>
       </div>
 
-      <div className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+      <div className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
         {customers.length === 0 ? (
           <div className="py-16 text-center">
             <UserGroupIcon size={48} className="mx-auto text-primary/20" />

@@ -47,7 +47,7 @@ export default async function AdminBookingsPage() {
         </Link>
       </div>
 
-      <div className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+      <div className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
         <BookingTable bookings={mapped} />
       </div>
     </div>

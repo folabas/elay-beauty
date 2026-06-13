@@ -5,7 +5,7 @@ import { sendEmail, bookingConfirmationEmail, adminNotificationEmail } from "@/l
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, phone, serviceName, date, time, hairLength, hairType, notes, isStudent, discountApplied, totalPrice } = body
+    const { name, email, phone, serviceName, date, time, hairLength, hairType, notes, isStudent, discountApplied, totalPrice, selectedSize } = body
 
     if (!name || !email || !serviceName || !date || !time) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         notes: notes || null,
         isStudent: isStudent || false,
         discountApplied: discountApplied || null,
+        selectedSize: selectedSize || null,
       },
     })
 

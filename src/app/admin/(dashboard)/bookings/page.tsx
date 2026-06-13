@@ -22,6 +22,7 @@ export default async function AdminBookingsPage() {
     hairType: b.hairType,
     notes: b.notes,
     isStudent: b.isStudent,
+    selectedSize: b.selectedSize,
     cancellationReason: b.cancellationReason,
     date: formatDate(b.date),
     time: b.time,

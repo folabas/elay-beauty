@@ -12,6 +12,7 @@ interface BookingDetails {
   service: string
   hairLength?: string | null
   hairType?: string | null
+  selectedSize?: string | null
   notes?: string | null
   isStudent: boolean
   date: string
@@ -118,6 +119,12 @@ export default function BookingDetailsDialog({ booking, onClose }: BookingDetail
                 <div>
                   <span className="text-xs font-medium uppercase tracking-wider text-muted">Hair Type</span>
                   <p className="mt-0.5 capitalize text-primary">{booking.hairType}</p>
+                </div>
+              )}
+              {booking.selectedSize && (
+                <div>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted">Size</span>
+                  <p className="mt-0.5 capitalize text-primary">{booking.selectedSize}</p>
                 </div>
               )}
               <div>

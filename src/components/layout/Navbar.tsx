@@ -9,6 +9,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import { 
   Home01Icon, 
   SparklesIcon, 
+  Image01Icon,
   Calendar01Icon, 
   BookOpen01Icon, 
   Mail01Icon, 
@@ -34,6 +35,7 @@ const navLinks = [
       { label: "Children's Hair", href: "/services#children" },
     ]
   },
+  { href: "/gallery", label: "Gallery", Icon: Image01Icon },
   { href: "/booking", label: "Book", Icon: Calendar01Icon },
   { href: "/policies", label: "Policies", Icon: BookOpen01Icon },
   { href: "/contact", label: "Contact", Icon: Mail01Icon },

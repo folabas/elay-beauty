@@ -19,6 +19,7 @@ interface BookingRow {
   status: "Pending" | "Confirmed" | "Completed" | "Cancelled"
   hairLength?: string | null
   hairType?: string | null
+  selectedSize?: string | null
   notes?: string | null
   isStudent: boolean
   cancellationReason?: string | null

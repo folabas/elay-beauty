@@ -23,7 +23,7 @@ const categories = [
     title: "Natural Hair",
     description: "Silk presses, wash & blow dry, and natural styling designed to nourish your texture.",
     image: "/images/natural_clay_illustration_1780950900942.png",
-    price: "From £15"
+    price: "From £20"
   },
   {
     title: "Children's Hair",

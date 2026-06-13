@@ -421,13 +421,13 @@ export default function AdminServicesPage() {
                         <p className={`text-base font-bold ${service.isActive ? "text-primary" : "text-primary/50"}`}>
                           {service.name}
                         </p>
-                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1">
+                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1 leading-relaxed whitespace-normal break-words">
                           {service.pricingTier && service.pricingTier.length > 0
                             ? service.pricingTier.map((t) => `${t.name}: £${t.price}`).join(" · ")
                             : `£${service.price}`
                           }
                           {service.durationRange && <span> · {service.durationRange}</span>}
-                          {service.description && <span> · {service.description}</span>}
+                          {service.description && <span className="hidden sm:inline"> · {service.description.length > 60 ? service.description.slice(0, 60) + "…" : service.description}</span>}
                           {!service.isActive && <span> · Disabled</span>}
                         </p>
                       </div>

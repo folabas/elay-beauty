@@ -309,7 +309,7 @@ export default function BookingPage() {
             </div>
             <span className="font-serif font-bold text-accent-dark">
               {service.pricingTier && service.pricingTier.length > 0
-                ? `From £${Math.min(...service.pricingTier.map(t => t.price))}`
+                ? `£${Math.min(...service.pricingTier.map(t => t.price))} - £${Math.max(...service.pricingTier.map(t => t.price))}`
                 : `£${service.price}`
               }
             </span>

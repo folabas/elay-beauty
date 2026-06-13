@@ -47,18 +47,27 @@ const faqs = [
   { question: "Can I make amendments to my booking prior to my appointment?", answer: "If you wish to make changes to your booking, please send us a message on WhatsApp. Please note that amendments may result in additional charges or a reduced cost depending on the service selected." },
 ]
 
+interface PricingTier {
+  name: string
+  price: number
+}
+
 interface ServiceItem {
   id: string
   name: string
   category: string
   description: string | null
   price: number
+  pricingTier: PricingTier[] | null
   imageUrl: string | null
   durationRange: string | null
   requiresHairInfo: boolean
 }
 
-function PriceCard({ name, price, note, imageUrl, onClick }: { name: string; price: number; note?: string; imageUrl?: string | null; onClick?: () => void }) {
+function PriceCard({ name, price, pricingTier, note, imageUrl, onClick }: { name: string; price: number; pricingTier?: PricingTier[] | null; note?: string; imageUrl?: string | null; onClick?: () => void }) {
+  const displayPrice = pricingTier && pricingTier.length > 0
+    ? `£${Math.min(...pricingTier.map(t => t.price))} - £${Math.max(...pricingTier.map(t => t.price))}`
+    : `£${price}`
   return (
     <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left">
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -73,7 +82,7 @@ function PriceCard({ name, price, note, imageUrl, onClick }: { name: string; pri
         </div>
       </div>
       <span className="whitespace-nowrap font-mono text-lg font-bold text-accent-dark pl-4">
-        £{price}
+        {displayPrice}
       </span>
     </button>
   )
@@ -194,6 +203,7 @@ export default function ServicesPage() {
                             key={service.id}
                             name={service.name}
                             price={service.price}
+                            pricingTier={service.pricingTier}
                             note={service.description || undefined}
                             imageUrl={service.imageUrl}
                             onClick={() => setSelectedService(service)}
@@ -298,7 +308,10 @@ export default function ServicesPage() {
                     {selectedService.name}
                   </h3>
                   <span className="shrink-0 font-mono text-2xl font-bold text-accent-dark">
-                    £{selectedService.price}
+                    {selectedService.pricingTier && selectedService.pricingTier.length > 0
+                      ? `£${Math.min(...selectedService.pricingTier.map(t => t.price))} - £${Math.max(...selectedService.pricingTier.map(t => t.price))}`
+                      : `£${selectedService.price}`
+                    }
                   </span>
                 </div>
 

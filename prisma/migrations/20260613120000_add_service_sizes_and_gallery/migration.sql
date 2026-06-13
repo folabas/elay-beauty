@@ -1,11 +1,17 @@
--- Add pricingTier to Service
-ALTER TABLE "Service" ADD COLUMN "pricingTier" TEXT;
+-- Add pricingTier to Service (if not already present from db push)
+DO $$ BEGIN
+  ALTER TABLE "Service" ADD COLUMN "pricingTier" TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 
--- Add selectedSize to Booking
-ALTER TABLE "Booking" ADD COLUMN "selectedSize" TEXT;
+-- Add selectedSize to Booking (if not already present from db push)
+DO $$ BEGIN
+  ALTER TABLE "Booking" ADD COLUMN "selectedSize" TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 
 -- Create GalleryImage table
-CREATE TABLE "GalleryImage" (
+CREATE TABLE IF NOT EXISTS "GalleryImage" (
     "id" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
     "caption" TEXT,

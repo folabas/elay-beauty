@@ -217,7 +217,7 @@ export default function AdminServicesPage() {
             initial={{ opacity: 0, y: -10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.97 }}
-            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated"
+            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto"
           >
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">
               {editingId ? "Edit Service" : "New Service"}
@@ -338,7 +338,7 @@ export default function AdminServicesPage() {
 
       <div className="mt-8 space-y-10">
         {groupedServices.map((group) => (
-          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">{group.label}</h2>
             {group.items.length === 0 ? (
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50 text-center py-8">No services in this category</p>

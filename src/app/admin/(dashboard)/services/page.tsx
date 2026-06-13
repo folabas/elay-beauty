@@ -407,32 +407,32 @@ export default function AdminServicesPage() {
                 {group.items.map((service) => (
                   <div
                     key={service.id}
-                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 gap-3 ${
+                    className={`grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-3 rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 overflow-hidden ${
                       service.isActive ? "border-primary/10 bg-white/50" : "border-dashed border-primary/10 bg-white/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0 flex-1 w-full sm:w-auto overflow-hidden">
+                    <div className="flex items-center gap-4 min-w-0 overflow-hidden">
                       {service.imageUrl && (
                         <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-primary/10 shadow-sm">
                           <img src={service.imageUrl} alt="" className="h-full w-full object-cover" />
                         </div>
                       )}
-                      <div className="min-w-0">
+                      <div className="min-w-0 overflow-hidden">
                         <p className={`text-base font-bold truncate ${service.isActive ? "text-primary" : "text-primary/50"}`}>
                           {service.name}
                         </p>
                         <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1 leading-relaxed break-words">
                           {service.pricingTier && service.pricingTier.length > 0
-                            ? service.pricingTier.map((t) => `${t.name}: £${t.price}`).join(" · ")
+                            ? service.pricingTier.map((t) => `${t.name}: £${t.price}`).join(", ")
                             : `£${service.price}`
                           }
                           {service.durationRange && <span> · {service.durationRange}</span>}
-                          {service.description && <span className="hidden sm:inline"> · {service.description.length > 60 ? service.description.slice(0, 60) + "…" : service.description}</span>}
+                          {service.description && <span className="hidden sm:inline"> · {service.description.length > 40 ? service.description.slice(0, 40) + "…" : service.description}</span>}
                           {!service.isActive && <span> · Disabled</span>}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
+                    <div className="flex items-center gap-2 justify-start sm:justify-end">
                       <button
                         onClick={() => toggleActive(service)}
                         className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 press-effect ${

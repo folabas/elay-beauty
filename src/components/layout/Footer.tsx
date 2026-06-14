@@ -50,7 +50,7 @@ export default function Footer() {
       <div className="container-section relative z-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <div className="footer-stagger">
-            <Image src="/logo/logo_main.png" alt="EL.AY Beauty" width={280} height={70} className="h-12 w-auto mb-4 brightness-0 invert" />
+            <Image src="/logo/logo_main.png" alt="EL.AY Beauty" width={280} height={70} className="h-12 w-auto mb-4 brightness-0 invert" unoptimized />
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               Premium hair braiding and natural styling services crafted with precision and care.
             </p>

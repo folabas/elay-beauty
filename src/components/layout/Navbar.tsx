@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useRef } from "react"
 import { gsap } from "gsap"
@@ -79,9 +80,7 @@ export default function Navbar() {
             py-4 px-4 sm:px-6 flex items-center relative"
         >
           <Link href="/" className="flex items-center gap-2 group shrink-0 z-10">
-            <span className="font-serif text-2xl font-bold tracking-tight text-primary transition-transform group-hover:scale-105">
-              EL.AY<span className="text-accent">_</span>beauty
-            </span>
+            <Image src="/logo/logo_text.png" alt="EL.AY Beauty" width={160} height={40} className="h-9 w-auto transition-transform group-hover:scale-105" priority />
           </Link>
 
           <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
@@ -181,9 +180,8 @@ export default function Navbar() {
         {/* Floating Pill Sidebar */}
         <div className={`absolute top-4 left-4 bottom-28 w-[280px] bg-background/95 backdrop-blur-xl shadow-elevated p-6 flex flex-col rounded-[40px] border border-primary/10 overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isSidebarOpen ? 'translate-x-0' : '-translate-x-[150%]'}`}>
           <div className="flex justify-between items-center mb-10 pl-2">
-            <span className="font-serif text-2xl font-bold tracking-tight text-primary">
-              EL.AY<span className="text-accent">_</span>
-            </span>
+            <Image src="/logo/logo_text.png" alt="EL.AY Beauty" width={140} height={35} className="h-8 w-auto" />
+            
             <button 
               onClick={() => setIsSidebarOpen(false)}
               className="p-2 rounded-full hover:bg-black/5 text-primary/60 hover:text-primary transition-colors press-effect"

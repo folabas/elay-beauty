@@ -16,8 +16,8 @@ const DEFAULT_SCHEDULE = [
   { day: "Tuesday", start: "09:00", end: "17:00", isActive: false },
   { day: "Wednesday", start: "09:00", end: "17:00", isActive: false },
   { day: "Thursday", start: "09:00", end: "17:00", isActive: false },
-  { day: "Friday", start: "17:00", end: "24:00", isActive: true },
-  { day: "Saturday", start: "07:00", end: "12:00", isActive: true },
+  { day: "Friday", start: "17:00", end: "19:00", isActive: true },
+  { day: "Saturday", start: "07:00", end: "09:00", isActive: true },
   { day: "Sunday", start: "15:00", end: "17:00", isActive: true },
 ]
 

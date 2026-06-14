@@ -121,8 +121,8 @@ export default function ContactPage() {
                 <div>
                   <p className="text-sm font-bold text-primary">Available Hours</p>
                   <div className="mt-1 space-y-0.5 text-xs text-primary/70">
-                    <p>Friday: 5:00 PM – Next Morning</p>
-                    <p>Saturday: 7:00 AM – 12:00 PM</p>
+                    <p>Friday: 5:00 PM – 7:00 PM</p>
+                    <p>Saturday: 7:00 AM – 9:00 AM</p>
                     <p>Sunday: 3:00 PM – 5:00 PM</p>
                   </div>
                 </div>

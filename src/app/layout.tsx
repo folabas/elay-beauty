@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     template: "%s | EL.AY Beauty",
   },
   description: "Book professional hair braiding appointments with EL.AY Beauty. Specializing in braids, natural hair styles, and children's styles.",
+  icons: {
+    icon: "/logo/logo_main.png",
+    apple: "/logo/logo_main.png",
+  },
 }
 
 export default function RootLayout({

@@ -60,7 +60,7 @@ export default function AdminSidebar() {
       >
         <div className="flex h-24 items-center gap-2 border-b border-primary/10 px-8">
           <Link href="/admin">
-            <Image src="/logo/logo_text.png" alt="EL.AY Beauty" width={140} height={35} className="h-7 w-auto" />
+            <Image src="/logo/logo_text.png" alt="EL.AY Beauty" width={180} height={45} className="h-10 w-auto" />
           </Link>
           <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-accent-dark">
             Admin

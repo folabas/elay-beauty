@@ -31,7 +31,7 @@ const policies = [
     title: "Late Arrival Policy",
     items: [
       "Arriving later than 15 minutes will result in £10 being deducted from your deposit.",
-      "Full payment will still be required.",
+      "If arrival is more than 30 minutes late, the booking will be cancelled and the deposit will not be refunded.",
     ],
   },
   {

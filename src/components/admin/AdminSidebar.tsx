@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import {
@@ -14,6 +15,7 @@ import {
   Cancel01Icon,
   Store01Icon,
   UserGroupIcon,
+  Image01Icon,
 } from "hugeicons-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -23,6 +25,7 @@ const navItems = [
   { href: "/admin/bookings", label: "Bookings", icon: Calendar01Icon },
   { href: "/admin/customers", label: "Customers", icon: UserGroupIcon },
   { href: "/admin/services", label: "Services", icon: Store01Icon },
+  { href: "/admin/gallery", label: "Gallery", icon: Image01Icon },
   { href: "/admin/availability", label: "Availability", icon: Calendar02Icon },
   { href: "/admin/settings", label: "Settings", icon: Settings01Icon },
 ]
@@ -56,8 +59,8 @@ export default function AdminSidebar() {
         )}
       >
         <div className="flex h-24 items-center gap-2 border-b border-primary/10 px-8">
-          <Link href="/admin" className="font-serif text-2xl font-bold tracking-tight text-primary">
-            EL.AY<span className="text-accent">_</span>
+          <Link href="/admin">
+            <Image src="/logo/logo_main.png" alt="EL.AY Beauty" width={200} height={50} className="h-12 w-auto" unoptimized />
           </Link>
           <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-accent-dark">
             Admin

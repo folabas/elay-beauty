@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useRef } from "react"
 import { gsap } from "gsap"
@@ -50,9 +51,7 @@ export default function Footer() {
       <div className="container-section relative z-20">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4 mb-6">
           <div className="footer-stagger">
-            <h3 className="font-serif text-2xl font-bold mb-4">
-              EL.AY<span className="text-accent">_</span>beauty
-            </h3>
+            <Image src="/logo/logo_main.png" alt="EL.AY Beauty" width={280} height={70} className="h-12 w-auto mb-4 brightness-0 invert" unoptimized />
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               Premium hair braiding and natural styling services crafted with precision and care.
             </p>
@@ -88,10 +87,10 @@ export default function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-6">Hours</h4>
             <ul className="space-y-4 text-sm text-white/60">
               <li className="flex justify-between border-b border-white/10 pb-2">
-                <span>Friday</span> <span className="text-white">5pm – late</span>
+                <span>Friday</span> <span className="text-white">5pm – 7pm</span>
               </li>
               <li className="flex justify-between border-b border-white/10 pb-2">
-                <span>Saturday</span> <span className="text-white">7am – 12pm</span>
+                <span>Saturday</span> <span className="text-white">7am – 9am</span>
               </li>
               <li className="flex justify-between border-b border-white/10 pb-2">
                 <span>Sunday</span> <span className="text-white">3pm – 5pm</span>
@@ -124,9 +123,7 @@ export default function Footer() {
 
         {/* Massive Brand Name */}
         <div className="footer-stagger flex flex-col justify-center items-center w-full overflow-hidden relative -mt-4">
-          <h1 className="text-[34vw] font-serif font-black leading-none tracking-tighter text-white/5 select-none -mb-8">
-            EL.AY
-          </h1>
+          <Image src="/logo/logo.png" alt="EL.AY Beauty" width={400} height={120} className="w-[34vw] max-w-[500px] h-auto opacity-5 -mb-8" />
           <div className="w-full flex flex-col sm:flex-row justify-between items-center text-xs text-white/40 mt-12 gap-2 relative z-10">
             <span>&copy; {new Date().getFullYear()} EL.AY Beauty. All rights reserved.</span>
             <span>Sponsored by <a href="https://waltiklabs.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition-colors">Waltik Labs</a></span>

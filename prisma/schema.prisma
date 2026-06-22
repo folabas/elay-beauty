@@ -42,6 +42,7 @@ model Service {
   category         Category
   description      String?
   price            Float
+  pricingTier      String?
   requiresHairInfo Boolean   @default(true)
   duration         Int?
   durationRange    String?
@@ -81,6 +82,7 @@ model Booking {
   cancellationReason String?
   isStudent          Boolean       @default(false)
   discountApplied    Float?
+  selectedSize       String?
   googleEventId      String?
   createdAt          DateTime      @default(now())
 }
@@ -93,6 +95,14 @@ model CalendarToken {
   email        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  caption   String?
+  sortOrder Int     @default(0)
+  createdAt DateTime @default(now())
 }
 
 model BlockedSlot {

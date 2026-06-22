@@ -42,10 +42,15 @@ const faqs = [
   { question: "Do you offer emergency or squeeze-in appointments?", answer: "Squeeze-in appointments are subject to availability and incur an additional £20 premium fee. Please message us on WhatsApp to inquire." },
   { question: "What is your privacy policy?", answer: "Your personal information is collected solely for the purpose of providing our services, processing bookings, and communicating with you. We do not share your data with third parties except where required by law. By booking with us, you consent to the collection and use of your information as described in our policy." },
   { question: "Is my deposit refundable?", answer: "Your deposit fee counts towards your service charge. Cancellations made more than 48 hours before your appointment will receive a full refund of your deposit. Cancellations made within 48 hours will result in a non-refundable deposit." },
-  { question: "Are there any late fee charges?", answer: "Yes, arriving more than 15 minutes late to your appointment will incur a £10 late fee." },
+  { question: "Are there any late fee charges?", answer: "Yes, arriving more than 15 minutes late will result in £10 being deducted from your deposit. Full payment for the service will still be required." },
   { question: "Are prices negotiable?", answer: "No, all prices are fixed and non-negotiable." },
   { question: "Can I make amendments to my booking prior to my appointment?", answer: "If you wish to make changes to your booking, please send us a message on WhatsApp. Please note that amendments may result in additional charges or a reduced cost depending on the service selected." },
 ]
+
+interface PricingTier {
+  name: string
+  price: number
+}
 
 interface ServiceItem {
   id: string
@@ -53,27 +58,31 @@ interface ServiceItem {
   category: string
   description: string | null
   price: number
+  pricingTier: PricingTier[] | null
   imageUrl: string | null
   durationRange: string | null
   requiresHairInfo: boolean
 }
 
-function PriceCard({ name, price, note, imageUrl, onClick }: { name: string; price: number; note?: string; imageUrl?: string | null; onClick?: () => void }) {
+function PriceCard({ name, price, pricingTier, note, imageUrl, onClick }: { name: string; price: number; pricingTier?: PricingTier[] | null; note?: string; imageUrl?: string | null; onClick?: () => void }) {
+  const displayPrice = pricingTier && pricingTier.length > 0
+    ? `£${Math.min(...pricingTier.map(t => t.price))} - £${Math.max(...pricingTier.map(t => t.price))}`
+    : `£${price}`
   return (
-    <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+    <button onClick={onClick} className="flex items-center justify-between rounded-xl border border-primary/10 glass-card p-5 shadow-soft transition-all duration-300 hover:border-accent/30 hover:shadow-card press-effect w-full text-left overflow-hidden">
+      <div className="flex items-center gap-3 min-w-0 flex-1 overflow-hidden">
         {imageUrl && (
           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-primary/10 bg-background">
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 overflow-hidden">
           <p className="font-medium text-primary text-sm sm:text-base truncate">{name}</p>
-          {note && <p className="mt-1 text-xs text-primary/60">{note}</p>}
+          {note && <p className="mt-1 text-xs text-primary/60 break-words">{note}</p>}
         </div>
       </div>
-      <span className="whitespace-nowrap font-mono text-lg font-bold text-accent-dark pl-4">
-        £{price}
+      <span className="shrink-0 font-mono text-lg font-bold text-accent-dark pl-4">
+        {displayPrice}
       </span>
     </button>
   )
@@ -166,7 +175,7 @@ export default function ServicesPage() {
                   id={category.toLowerCase()}
                   className="stack-section pt-4 mb-16 last:mb-10"
                 >
-                  <div className="w-full glass-card p-6 sm:p-12 border-t border-primary/10 shadow-elevated grid lg:grid-cols-[1fr_2fr] gap-12 items-start bg-white/70">
+                  <div className="w-full glass-card p-6 sm:p-12 border-t border-primary/10 shadow-elevated grid lg:grid-cols-[1fr_2fr] gap-12 items-start bg-white/70 overflow-hidden">
                     <div className="lg:sticky lg:top-32">
                       <div className="mb-6 flex items-center gap-4">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white shadow-glow">
@@ -194,6 +203,7 @@ export default function ServicesPage() {
                             key={service.id}
                             name={service.name}
                             price={service.price}
+                            pricingTier={service.pricingTier}
                             note={service.description || undefined}
                             imageUrl={service.imageUrl}
                             onClick={() => setSelectedService(service)}
@@ -298,7 +308,10 @@ export default function ServicesPage() {
                     {selectedService.name}
                   </h3>
                   <span className="shrink-0 font-mono text-2xl font-bold text-accent-dark">
-                    £{selectedService.price}
+                    {selectedService.pricingTier && selectedService.pricingTier.length > 0
+                      ? `£${Math.min(...selectedService.pricingTier.map(t => t.price))} - £${Math.max(...selectedService.pricingTier.map(t => t.price))}`
+                      : `£${selectedService.price}`
+                    }
                   </span>
                 </div>
 

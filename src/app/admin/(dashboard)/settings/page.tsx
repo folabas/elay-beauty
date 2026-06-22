@@ -70,7 +70,7 @@ function SettingsContent() {
         </div>
       )}
 
-      <div className="glass-card rounded-[32px] border border-primary/10 p-6 sm:p-8 shadow-elevated">
+      <div className="glass-card rounded-[32px] border border-primary/10 p-6 sm:p-8 shadow-elevated overflow-x-auto">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           <div className="flex h-12 w-12 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-accent/10 shadow-sm relative overflow-hidden group">
             <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />

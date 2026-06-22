@@ -81,8 +81,8 @@ export const PRICE_LIST = {
 } as const
 
 export const AVAILABILITY_SCHEDULE = [
-  { day: "Friday", start: "17:00", end: "24:00", note: "Long braids may finish late or require overnight stay" },
-  { day: "Saturday", start: "07:00", end: "12:00", note: "Last booking at 8:00 AM. Long braids not available on Saturdays." },
+  { day: "Friday", start: "17:00", end: "19:00", note: "Last booking at 6:00 PM." },
+  { day: "Saturday", start: "07:00", end: "09:00", note: "Last booking at 8:00 AM. Only 7 AM and 8 AM available." },
   { day: "Sunday", start: "15:00", end: "17:00", note: "Only Cornrows and Crotchet available on Sundays." },
 ]
 

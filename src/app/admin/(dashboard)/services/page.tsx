@@ -10,12 +10,18 @@ const CATEGORY_LABELS: Record<string, string> = {
   CHILDREN: "Children (12 years and below)",
 }
 
+interface PricingTier {
+  name: string
+  price: number
+}
+
 interface Service {
   id: string
   name: string
   category: string
   description: string | null
   price: number
+  pricingTier: PricingTier[] | null
   duration: number | null
   durationRange: string | null
   requiresHairInfo: boolean
@@ -33,13 +39,15 @@ export default function AdminServicesPage() {
 
   const [form, setForm] = useState({
     name: "",
-    category: "BRAIDS",
+    category: "BRAIDS" as string,
     price: "",
+    pricingTier: [] as PricingTier[],
     description: "",
     durationRange: "",
     requiresHairInfo: true,
     imageUrl: "",
   })
+  const [pricingMode, setPricingMode] = useState<"single" | "tier">("single")
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
 
@@ -64,7 +72,8 @@ export default function AdminServicesPage() {
   }
 
   const resetForm = () => {
-    setForm({ name: "", category: "BRAIDS", price: "", description: "", durationRange: "", requiresHairInfo: true, imageUrl: "" })
+    setForm({ name: "", category: "BRAIDS", price: "", pricingTier: [], description: "", durationRange: "", requiresHairInfo: true, imageUrl: "" })
+    setPricingMode("single")
     setEditingId(null)
     setShowForm(false)
   }
@@ -74,11 +83,13 @@ export default function AdminServicesPage() {
       name: service.name,
       category: service.category,
       price: String(service.price),
+      pricingTier: service.pricingTier || [],
       description: service.description || "",
       durationRange: service.durationRange || "",
       requiresHairInfo: service.requiresHairInfo,
       imageUrl: service.imageUrl || "",
     })
+    setPricingMode(service.pricingTier && service.pricingTier.length > 0 ? "tier" : "single")
     setEditingId(service.id)
     setShowForm(true)
   }
@@ -105,15 +116,18 @@ export default function AdminServicesPage() {
   }
 
   const saveService = async () => {
-    if (!form.name || !form.price) return
+    if (!form.name) return
+    if (pricingMode === "single" && !form.price) return
+    if (pricingMode === "tier" && form.pricingTier.some((t) => !t.price)) return
     setSaving(true)
 
     try {
-      const body = {
+      const body: Record<string, unknown> = {
         ...(editingId ? { id: editingId } : {}),
         name: form.name,
         category: form.category,
-        price: parseFloat(form.price),
+        price: pricingMode === "single" ? parseFloat(form.price) : 0,
+        pricingTier: pricingMode === "tier" ? form.pricingTier : null,
         description: form.description || null,
         durationRange: form.durationRange || null,
         requiresHairInfo: form.requiresHairInfo,
@@ -217,7 +231,7 @@ export default function AdminServicesPage() {
             initial={{ opacity: 0, y: -10, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.97 }}
-            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated"
+            className="mt-8 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-hidden"
           >
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">
               {editingId ? "Edit Service" : "New Service"}
@@ -245,14 +259,60 @@ export default function AdminServicesPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Price (£) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="block w-full rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
-                />
+                <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Pricing</label>
+                <div className="flex items-center gap-2 bg-white/50 p-1 rounded-xl border border-primary/10 w-fit mb-3">
+                  <button
+                    onClick={() => setPricingMode("single")}
+                    className={`rounded-lg px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      pricingMode === "single" ? "bg-primary text-white shadow-md" : "text-primary/60 hover:text-primary"
+                    }`}
+                  >
+                    Single Price
+                  </button>
+                  <button
+                    onClick={() => setPricingMode("tier")}
+                    className={`rounded-lg px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      pricingMode === "tier" ? "bg-primary text-white shadow-md" : "text-primary/60 hover:text-primary"
+                    }`}
+                  >
+                    Size Variants
+                  </button>
+                </div>
+                {pricingMode === "single" ? (
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    className="block w-full rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {["Small", "Medium", "Large"].map((size) => {
+                      const tier = form.pricingTier.find((t) => t.name === size)
+                      return (
+                        <div key={size} className="flex items-center gap-3">
+                          <span className="w-16 text-sm font-bold text-primary/70 uppercase tracking-wider">{size}</span>
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-primary/40 font-medium">£</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              value={tier?.price ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value ? parseFloat(e.target.value) : 0
+                                const updated = [...form.pricingTier.filter((t) => t.name !== size), { name: size, price: val }]
+                                setForm({ ...form, pricingTier: updated })
+                              }}
+                              className="block w-full rounded-xl border border-primary/10 bg-primary/5 pl-8 pr-4 py-2.5 text-sm font-medium text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all"
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-primary/70">Duration</label>
@@ -338,7 +398,7 @@ export default function AdminServicesPage() {
 
       <div className="mt-8 space-y-10">
         {groupedServices.map((group) => (
-          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+          <div key={group.category} className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-hidden">
             <h2 className="font-serif text-2xl font-bold text-primary mb-6">{group.label}</h2>
             {group.items.length === 0 ? (
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary/50 text-center py-8">No services in this category</p>
@@ -347,29 +407,32 @@ export default function AdminServicesPage() {
                 {group.items.map((service) => (
                   <div
                     key={service.id}
-                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 gap-3 ${
+                    className={`grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start sm:items-center gap-3 rounded-2xl border p-4 sm:p-5 transition-all hover:bg-black/5 overflow-hidden ${
                       service.isActive ? "border-primary/10 bg-white/50" : "border-dashed border-primary/10 bg-white/20"
                     }`}
                   >
-                    <div className="flex items-center gap-4 min-w-0 flex-1 w-full sm:w-auto">
+                    <div className="flex items-center gap-4 min-w-0 overflow-hidden">
                       {service.imageUrl && (
                         <div className="relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-xl border border-primary/10 shadow-sm">
                           <img src={service.imageUrl} alt="" className="h-full w-full object-cover" />
                         </div>
                       )}
-                      <div>
-                        <p className={`text-base font-bold ${service.isActive ? "text-primary" : "text-primary/50"}`}>
+                      <div className="min-w-0 overflow-hidden">
+                        <p className={`text-base font-bold truncate ${service.isActive ? "text-primary" : "text-primary/50"}`}>
                           {service.name}
                         </p>
-                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1">
-                          £{service.price}
+                        <p className="text-[11px] font-medium tracking-wide text-primary/70 mt-1 leading-relaxed break-words">
+                          {service.pricingTier && service.pricingTier.length > 0
+                            ? service.pricingTier.map((t) => `${t.name}: £${t.price}`).join(", ")
+                            : `£${service.price}`
+                          }
                           {service.durationRange && <span> · {service.durationRange}</span>}
-                          {service.description && <span> · {service.description}</span>}
+                          {service.description && <span className="hidden sm:inline"> · {service.description.length > 40 ? service.description.slice(0, 40) + "…" : service.description}</span>}
                           {!service.isActive && <span> · Disabled</span>}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
+                    <div className="flex items-center gap-2 justify-start sm:justify-end">
                       <button
                         onClick={() => toggleActive(service)}
                         className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 press-effect ${

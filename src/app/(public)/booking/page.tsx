@@ -7,12 +7,13 @@ import { SERVICE_IMAGES, type BookingFormData } from "@/types"
 import DatePicker from "@/components/booking/DatePicker"
 import { CheckCircle, ArrowRight, ArrowLeft, GraduationCap } from "lucide-react"
 
-type Step = "service" | "datetime" | "details" | "payment" | "confirmation"
+type Step = "service" | "size" | "datetime" | "details" | "payment" | "confirmation"
 
 export default function BookingPage() {
   const [step, setStep] = useState<Step>("service")
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [selectedService, setSelectedService] = useState<{ name: string; price: number } | null>(null)
+  const [selectedSize, setSelectedSize] = useState<string>("")
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [selectedTime, setSelectedTime] = useState<string>("")
   const [formData, setFormData] = useState({
@@ -103,7 +104,7 @@ export default function BookingPage() {
     return () => clearTimeout(timer)
   }, [formData.email])
 
-  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string; imageUrl: string | null }[]>([])
+  const [allServices, setAllServices] = useState<{ name: string; price: number; category: string; id: string; imageUrl: string | null; pricingTier: { name: string; price: number }[] | null }[]>([])
 
   useEffect(() => {
     async function load() {
@@ -111,7 +112,7 @@ export default function BookingPage() {
         const res = await fetch("/api/services")
         if (res.ok) {
           const data = await res.json()
-          setAllServices(data.map((s: { name: string; price: number; category: string; id: string; imageUrl: string | null }) => ({ name: s.name, price: s.price, category: s.category, id: s.id, imageUrl: s.imageUrl })))
+          setAllServices(data.map((s: { name: string; price: number; category: string; id: string; imageUrl: string | null; pricingTier: { name: string; price: number }[] | null }) => ({ name: s.name, price: s.price, category: s.category, id: s.id, imageUrl: s.imageUrl, pricingTier: s.pricingTier })))
         }
       } catch { /* ignore */ }
     }
@@ -126,9 +127,14 @@ export default function BookingPage() {
     ? allServices.filter((s) => s.category === selectedCategory)
     : allServices
 
-  const handleSelectService = (name: string, price: number) => {
+  const handleSelectService = (name: string, price: number, pricingTier?: { name: string; price: number }[] | null) => {
     setSelectedService({ name, price })
-    setStep("datetime")
+    setSelectedSize("")
+    if (pricingTier && pricingTier.length > 0) {
+      setStep("size")
+    } else {
+      setStep("datetime")
+    }
   }
 
   const handleDateTimeNext = () => {
@@ -176,6 +182,7 @@ export default function BookingPage() {
           hairType: formData.hairType || undefined,
           notes: formData.notes || undefined,
           isStudent: formData.isStudent,
+          selectedSize: selectedSize || undefined,
           discountApplied: loyaltyDiscount,
           totalPrice: finalPrice,
         }),
@@ -207,12 +214,16 @@ export default function BookingPage() {
   const depositRequired = true
 
   const renderProgress = () => {
-    const steps: { key: Step; label: string }[] = [
+    const baseSteps: { key: Step; label: string }[] = [
       { key: "service", label: "Service" },
       { key: "datetime", label: "Date & Time" },
       { key: "details", label: "Details" },
       { key: "payment", label: "Payment" },
     ]
+    const hasSizes = selectedService && allServices.find(s => s.name === selectedService.name)?.pricingTier?.length
+    const steps = hasSizes
+      ? [{ key: "service" as Step, label: "Service" }, { key: "size" as Step, label: "Size" }, ...baseSteps.slice(1)]
+      : baseSteps
     const currentIndex = steps.findIndex((s) => s.key === step)
 
     return (
@@ -279,7 +290,7 @@ export default function BookingPage() {
         {filteredServices.map((service) => (
           <button
             key={service.name}
-            onClick={() => handleSelectService(service.name, service.price)}
+            onClick={() => handleSelectService(service.name, service.price, service.pricingTier)}
             className={`flex items-center justify-between rounded-xl border p-5 shadow-sm press-effect text-left transition-all hover:border-accent/30 hover:shadow-card ${
               selectedService?.name === service.name
                 ? "border-accent bg-accent/5"
@@ -296,12 +307,54 @@ export default function BookingPage() {
               )}
               <span className="text-sm font-medium text-primary">{service.name}</span>
             </div>
-            <span className="font-serif font-bold text-accent-dark">£{service.price}</span>
+            <span className="font-serif font-bold text-accent-dark">
+              {service.pricingTier && service.pricingTier.length > 0
+                ? `£${Math.min(...service.pricingTier.map(t => t.price))} - £${Math.max(...service.pricingTier.map(t => t.price))}`
+                : `£${service.price}`
+              }
+            </span>
           </button>
         ))}
       </div>
     </div>
   )
+
+  const renderSizeStep = () => {
+    const service = allServices.find(s => s.name === selectedService?.name)
+    const tiers = service?.pricingTier || []
+    return (
+      <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-2xl font-bold text-primary">Choose Size</h2>
+            <p className="mt-2 text-muted">Select a size for {selectedService?.name}</p>
+          </div>
+          <button onClick={() => { setStep("service"); setSelectedService(null) }} className="text-xs text-muted hover:text-primary underline">Change</button>
+        </div>
+
+        <div className="mt-6 space-y-3">
+          {tiers.map((tier) => (
+            <button
+              key={tier.name}
+              onClick={() => { setSelectedSize(tier.name); setSelectedService({ name: selectedService!.name, price: tier.price }); setStep("datetime") }}
+              className={`flex items-center justify-between w-full rounded-xl border p-5 shadow-sm press-effect text-left transition-all hover:border-accent/30 hover:shadow-card ${
+                selectedSize === tier.name ? "border-accent bg-accent/5" : "border-primary/10 glass-card"
+              }`}
+            >
+              <span className="text-sm font-medium text-primary">{tier.name}</span>
+              <span className="font-serif font-bold text-accent-dark">£{tier.price}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-8">
+          <button onClick={() => setStep("service")} className="flex items-center gap-2 text-sm font-medium text-muted hover:text-primary">
+            <ArrowLeft className="h-4 w-4" /> Back to Services
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const renderDateTimeStep = () => (
     <div>
@@ -495,7 +548,7 @@ export default function BookingPage() {
 
   const renderPaymentStep = () => {
     const priceBreakdown = [
-      { label: selectedService?.name ?? "", amount: totalPrice },
+      { label: selectedSize ? `${selectedService?.name} (${selectedSize})` : (selectedService?.name ?? ""), amount: totalPrice },
     ]
     if (formData.isStudent) {
       priceBreakdown.push({ label: "Student Discount (20%)", amount: -(totalPrice * 0.2) })
@@ -512,7 +565,7 @@ export default function BookingPage() {
         <div className="mt-6 space-y-4">
           <div className="rounded-lg border border-primary/10 glass-card p-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">Service</h3>
-            <p className="mt-1 text-primary">{selectedService?.name}</p>
+            <p className="mt-1 text-primary">{selectedService?.name}{selectedSize ? ` (${selectedSize})` : ""}</p>
             <p className="mt-1 text-sm text-muted">
               {selectedDate} at {selectedTime}
             </p>
@@ -634,7 +687,7 @@ export default function BookingPage() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Service</span>
-            <span className="font-medium text-primary">{selectedService?.name}</span>
+            <span className="font-medium text-primary">{selectedService?.name}{selectedSize ? ` (${selectedSize})` : ""}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Date</span>
@@ -717,6 +770,7 @@ export default function BookingPage() {
         onClick={() => {
           setStep("service")
           setSelectedService(null)
+          setSelectedSize("")
           setSelectedCategory("")
           setSelectedDate("")
           setSelectedTime("")
@@ -760,6 +814,7 @@ export default function BookingPage() {
 
           <div ref={stepContainerRef}>
             {step === "service" && renderServiceStep()}
+            {step === "size" && renderSizeStep()}
             {step === "datetime" && renderDateTimeStep()}
             {step === "details" && renderDetailsStep()}
             {step === "payment" && renderPaymentStep()}

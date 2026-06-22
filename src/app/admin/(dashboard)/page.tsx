@@ -59,7 +59,7 @@ export default async function AdminDashboard() {
         })}
       </div>
 
-      <div className="mt-12 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+      <div className="mt-12 glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-serif text-2xl font-bold text-primary">
             Recent Bookings

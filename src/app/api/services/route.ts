@@ -6,7 +6,11 @@ export async function GET() {
     const services = await prisma.service.findMany({
       orderBy: [{ category: "asc" }, { name: "asc" }],
     })
-    return NextResponse.json(services)
+    const parsed = services.map((s) => ({
+      ...s,
+      pricingTier: s.pricingTier ? JSON.parse(s.pricingTier) : null,
+    }))
+    return NextResponse.json(parsed)
   } catch (error) {
     console.error("Failed to fetch services:", error)
     return NextResponse.json({ error: "Failed to fetch services" }, { status: 500 })
@@ -16,7 +20,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, category, price, description, duration, durationRange, requiresHairInfo, imageUrl } = body
+    const { name, category, price, pricingTier, description, duration, durationRange, requiresHairInfo, imageUrl } = body
 
     if (!name || !category || price === undefined) {
       return NextResponse.json({ error: "Name, category, and price are required" }, { status: 400 })
@@ -27,6 +31,7 @@ export async function POST(request: Request) {
         name,
         category,
         price: Number(price),
+        pricingTier: pricingTier ? JSON.stringify(pricingTier) : null,
         description: description || null,
         duration: duration ? Number(duration) : null,
         requiresHairInfo: requiresHairInfo !== false,
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, category, price, description, duration, durationRange, requiresHairInfo, isActive, imageUrl } = body
+    const { id, name, category, price, pricingTier, description, duration, durationRange, requiresHairInfo, isActive, imageUrl } = body
 
     if (!id) {
       return NextResponse.json({ error: "Service ID is required" }, { status: 400 })
@@ -55,6 +60,7 @@ export async function PUT(request: Request) {
     if (name !== undefined) data.name = name
     if (category !== undefined) data.category = category
     if (price !== undefined) data.price = Number(price)
+    if (pricingTier !== undefined) data.pricingTier = pricingTier ? JSON.stringify(pricingTier) : null
     if (description !== undefined) data.description = description
     if (duration !== undefined) data.duration = duration ? Number(duration) : null
     if (requiresHairInfo !== undefined) data.requiresHairInfo = requiresHairInfo

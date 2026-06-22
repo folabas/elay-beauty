@@ -8,7 +8,7 @@ export default function AdminAvailabilityPage() {
       </h1>
 
       <div className="mt-8 mx-auto max-w-2xl">
-        <div className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated">
+        <div className="glass-card border border-primary/10 rounded-[32px] p-6 sm:p-8 shadow-elevated overflow-x-auto">
           <AvailabilityEditor />
         </div>
       </div>

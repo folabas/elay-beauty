@@ -35,8 +35,9 @@ export default function Footer() {
   // Don't show complex footer on booking page to keep focus on flow
   if (pathname === "/booking") {
     return (
-      <footer className="py-6 text-center text-xs text-muted">
-        &copy; {new Date().getFullYear()} EL.AY Beauty
+      <footer className="py-6 flex flex-col items-center gap-2 text-center text-xs text-muted">
+        <div>&copy; {new Date().getFullYear()} EL.AY Beauty</div>
+        <div>Sponsored by <a href="https://waltiklabs.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">Waltik Labs</a></div>
       </footer>
     )
   }
@@ -128,6 +129,7 @@ export default function Footer() {
           </h1>
           <div className="w-full flex flex-col sm:flex-row justify-between items-center text-xs text-white/40 mt-12 gap-2 relative z-10">
             <span>&copy; {new Date().getFullYear()} EL.AY Beauty. All rights reserved.</span>
+            <span>Sponsored by <a href="https://waltiklabs.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition-colors">Waltik Labs</a></span>
             <span>Student discount: 20% off</span>
           </div>
         </div>

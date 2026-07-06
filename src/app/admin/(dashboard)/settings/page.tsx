@@ -97,31 +97,33 @@ function SettingsContent() {
           {connected === null ? (
             <div className="h-6 w-6 animate-pulse rounded-full bg-primary/10" />
           ) : connected ? (
-            <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-              <span className="flex items-center justify-center sm:justify-start gap-2 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
-                <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                Connected
-              </span>
-              {calendarEmail && (
-                <span className="text-[11px] font-medium text-primary/50 text-center sm:text-left truncate max-w-[200px]">
-                  {calendarEmail}
+            <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                  Connected
                 </span>
-              )}
+                {calendarEmail && (
+                  <span className="text-[11px] font-medium text-primary/50 truncate max-w-[200px]">
+                    {calendarEmail}
+                  </span>
+                )}
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleReconnect}
                   disabled={reconnecting}
-                  className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-primary/10 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
                 >
-                  <Refresh01Icon size={14} />
+                  <Refresh01Icon size={13} />
                   {reconnecting ? "Reconnecting..." : "Reconnect"}
                 </button>
                 <button
                   onClick={handleDisconnect}
                   disabled={disconnecting}
-                  className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-primary/10 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
                 >
-                  <Unlink01Icon size={14} />
+                  <Unlink01Icon size={13} />
                   {disconnecting ? "Disconnecting..." : "Disconnect"}
                 </button>
               </div>
@@ -129,9 +131,9 @@ function SettingsContent() {
           ) : (
             <a
               href="/api/auth/google-calendar"
-              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
+              className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all duration-300 hover:bg-primary-light active:scale-95 shadow-md hover:-translate-y-1 hover:shadow-glow press-effect"
             >
-              <Link01Icon size={16} />
+              <Link01Icon size={15} />
               Connect
             </a>
           )}

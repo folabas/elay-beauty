@@ -1,7 +1,11 @@
 import { google } from "googleapis"
 import { prisma } from "@/lib/prisma"
 
-const SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+const SCOPES = [
+  "https://www.googleapis.com/auth/calendar.events",
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+]
 const TIMEZONE = "Europe/London"
 
 function getOAuthClient() {

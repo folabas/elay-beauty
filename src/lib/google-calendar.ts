@@ -5,11 +5,21 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 const TIMEZONE = "Europe/London"
 
 function getOAuthClient() {
-  return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI,
-  )
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI
+
+  const missing = [
+    !clientId && "GOOGLE_CLIENT_ID",
+    !clientSecret && "GOOGLE_CLIENT_SECRET",
+    !redirectUri && "GOOGLE_REDIRECT_URI",
+  ].filter(Boolean)
+
+  if (missing.length > 0) {
+    throw new Error(`Google Calendar not configured: missing ${missing.join(", ")}. Set these in your environment variables.`)
+  }
+
+  return new google.auth.OAuth2(clientId, clientSecret, redirectUri)
 }
 
 export function getAuthUrl(): string {
@@ -33,10 +43,19 @@ export async function saveTokensFromCode(code: string): Promise<void> {
 
   let email: string | null = null
   try {
-    const { data } = await google.oauth2("v2").userinfo.get({ auth: oauth2Client })
-    email = data.email ?? null
+    const { data } = await google.people("v1").people.get({
+      auth: oauth2Client,
+      resourceName: "people/me",
+      personFields: "emailAddresses",
+    })
+    email = data.emailAddresses?.[0]?.value ?? null
   } catch {
-    // email not available
+    try {
+      const tokenInfo = await oauth2Client.getTokenInfo(tokens.access_token!)
+      email = tokenInfo.email ?? null
+    } catch {
+      // email not available
+    }
   }
 
   const existing = await prisma.calendarToken.findFirst()
@@ -102,10 +121,14 @@ export async function createBookingEvent(booking: BookingForCalendar) {
 
   const dateStr = booking.date.toISOString().split("T")[0]
   const [hours, minutes] = booking.time.split(":").map(Number)
-  const startDateTime = new Date(`${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`)
 
   const durationMinutes = booking.service.duration ?? 60
-  const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000)
+  const startTotal = hours * 60 + minutes
+  const endTotal = startTotal + durationMinutes
+  const endHours = Math.floor(endTotal / 60)
+  const endMinutes = endTotal % 60
+
+  const pad = (n: number) => String(n).padStart(2, "0")
 
   const event = {
     summary: `EL.AY Beauty – ${booking.service.name} – ${booking.client.name}`,
@@ -119,11 +142,11 @@ export async function createBookingEvent(booking: BookingForCalendar) {
       .filter(Boolean)
       .join("\n"),
     start: {
-      dateTime: startDateTime.toISOString(),
+      dateTime: `${dateStr}T${pad(hours)}:${pad(minutes)}:00`,
       timeZone: TIMEZONE,
     },
     end: {
-      dateTime: endDateTime.toISOString(),
+      dateTime: `${dateStr}T${pad(endHours)}:${pad(endMinutes)}:00`,
       timeZone: TIMEZONE,
     },
     reminders: {
@@ -145,10 +168,14 @@ export async function updateBookingEvent(eventId: string, booking: BookingForCal
 
   const dateStr = booking.date.toISOString().split("T")[0]
   const [hours, minutes] = booking.time.split(":").map(Number)
-  const startDateTime = new Date(`${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`)
 
   const durationMinutes = booking.service.duration ?? 60
-  const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000)
+  const startTotal = hours * 60 + minutes
+  const endTotal = startTotal + durationMinutes
+  const endHours = Math.floor(endTotal / 60)
+  const endMinutes = endTotal % 60
+
+  const pad = (n: number) => String(n).padStart(2, "0")
 
   const event = {
     summary: `EL.AY Beauty – ${booking.service.name} – ${booking.client.name}`,
@@ -162,11 +189,11 @@ export async function updateBookingEvent(eventId: string, booking: BookingForCal
       .filter(Boolean)
       .join("\n"),
     start: {
-      dateTime: startDateTime.toISOString(),
+      dateTime: `${dateStr}T${pad(hours)}:${pad(minutes)}:00`,
       timeZone: TIMEZONE,
     },
     end: {
-      dateTime: endDateTime.toISOString(),
+      dateTime: `${dateStr}T${pad(endHours)}:${pad(endMinutes)}:00`,
       timeZone: TIMEZONE,
     },
   }

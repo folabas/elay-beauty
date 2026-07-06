@@ -48,14 +48,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           })
         }
       } catch (err) {
-        calendarWarning = err instanceof Error ? err.message : "Unknown error"
+        const msg = err instanceof Error ? err.message : "Unknown error"
+        calendarWarning = `Calendar event failed: ${msg}`
         console.error("[CALENDAR] Failed to create event:", err)
       }
 
       return NextResponse.json({
         message: "Deposit confirmed",
         emailWarning: emailResult.ok ? undefined : `Email failed: ${emailResult.error}`,
-        calendarWarning: calendarWarning ? `Calendar event failed: ${calendarWarning}` : undefined,
+        calendarWarning,
       })
     }
 

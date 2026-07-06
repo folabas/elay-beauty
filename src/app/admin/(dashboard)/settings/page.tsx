@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
-import { Calendar01Icon, Link01Icon, Unlink01Icon, CheckmarkCircle01Icon, Alert01Icon } from "hugeicons-react"
+import { Calendar01Icon, Link01Icon, Unlink01Icon, Refresh01Icon, CheckmarkCircle01Icon, Alert01Icon } from "hugeicons-react"
 import { useEffect, useState, Suspense } from "react"
 
 function SettingsContent() {
@@ -11,6 +11,7 @@ function SettingsContent() {
   const [connected, setConnected] = useState<boolean | null>(null)
   const [calendarEmail, setCalendarEmail] = useState<string | null>(null)
   const [disconnecting, setDisconnecting] = useState(false)
+  const [reconnecting, setReconnecting] = useState(false)
 
   const success = searchParams.get("success")
   const error = searchParams.get("error")
@@ -33,6 +34,16 @@ function SettingsContent() {
     } finally {
       setDisconnecting(false)
     }
+  }
+
+  const handleReconnect = async () => {
+    setReconnecting(true)
+    try {
+      await fetch("/api/auth/google-calendar/disconnect", { method: "POST" })
+    } catch {
+      // ignore
+    }
+    window.location.href = "/api/auth/google-calendar"
   }
 
   return (
@@ -96,14 +107,24 @@ function SettingsContent() {
                   {calendarEmail}
                 </span>
               )}
-              <button
-                onClick={handleDisconnect}
-                disabled={disconnecting}
-                className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
-              >
-                <Unlink01Icon size={14} />
-                {disconnecting ? "Disconnecting..." : "Disconnect"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleReconnect}
+                  disabled={reconnecting}
+                  className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
+                >
+                  <Refresh01Icon size={14} />
+                  {reconnecting ? "Reconnecting..." : "Reconnect"}
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  disabled={disconnecting}
+                  className="flex items-center justify-center gap-2 rounded-full border border-primary/10 bg-white px-5 py-3 sm:py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 active:scale-95 disabled:opacity-50 press-effect shadow-sm"
+                >
+                  <Unlink01Icon size={14} />
+                  {disconnecting ? "Disconnecting..." : "Disconnect"}
+                </button>
+              </div>
             </div>
           ) : (
             <a

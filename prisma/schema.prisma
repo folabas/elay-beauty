@@ -105,6 +105,15 @@ model GalleryImage {
   createdAt DateTime @default(now())
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  author    String
+  rating    Int
+  content   String
+  isApproved Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+
 model BlockedSlot {
   id        String   @id @default(cuid())
   date      DateTime

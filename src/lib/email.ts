@@ -205,6 +205,38 @@ export function rescheduleOfferEmail(params: {
   return { subject: "Alternative Time Offered – EL.AY Beauty", html: wrapHtml("Alternative Time Offered", content) }
 }
 
+export function reviewNotificationEmail(params: {
+  author: string
+  rating: number
+  content: string
+}) {
+  const stars = "★".repeat(params.rating) + "☆".repeat(5 - params.rating)
+  const content = `
+    <div style="text-align:center;margin-bottom:16px;">
+      <span class="badge gold">NEW REVIEW</span>
+    </div>
+    <h2 style="text-align:center;">New Review Received</h2>
+    <p style="text-align:center;color:#9ca3af;">A client has left a review</p>
+
+    <div class="details">
+      <table>
+        <tr><td class="label">Author</td><td class="value">${params.author}</td></tr>
+        <tr><td class="label">Rating</td><td class="value gold">${stars} (${params.rating}/5)</td></tr>
+      </table>
+    </div>
+
+    <div style="background:#faf9f6;border-radius:8px;padding:20px;margin:0 0 20px;">
+      <p style="font-family:'Inter',Arial,sans-serif;font-size:14px;color:#4b5563;font-style:italic;margin:0;">
+        &ldquo;${params.content}&rdquo;
+      </p>
+    </div>
+
+    <p style="text-align:center;margin:0;"><a href="https://elay-beauty.vercel.app/admin/reviews" style="display:inline-block;background:#1a1a2e;color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:8px;font-family:'Inter',Arial,sans-serif;font-size:14px;font-weight:600;">View in Admin Dashboard</a></p>
+  `
+
+  return { subject: `New Review: ${params.author} – ${params.rating}/5`, html: wrapHtml("New Review", content) }
+}
+
 export function adminNotificationEmail(params: {
   clientName: string
   service: string

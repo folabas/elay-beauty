@@ -117,8 +117,11 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
       setBookings(bookings.map((b) =>
         b.id === id ? { ...b, depositPaid: true, status: "Confirmed" as const } : b
       ))
-      const emailMsg = data.emailWarning ? ` ${data.emailWarning}` : ""
-      showToast(`Booking #${id.slice(0, 8)} deposit confirmed.${emailMsg}`)
+      const warnings: string[] = []
+      if (data.emailWarning) warnings.push(data.emailWarning)
+      if (data.calendarWarning) warnings.push(data.calendarWarning)
+      const warnMsg = warnings.length > 0 ? ` ${warnings.join(" | ")}` : ""
+      showToast(`Booking #${id.slice(0, 8)} deposit confirmed.${warnMsg}`)
     } catch (err) {
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to mark paid"}`)
     } finally {

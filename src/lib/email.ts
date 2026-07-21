@@ -125,6 +125,10 @@ export function bookingConfirmationEmail(params: {
         <tr><td class="label">Time</td><td class="value">${params.time}</td></tr>
         <tr><td class="label">Total</td><td class="value gold">£${params.totalPrice}</td></tr>
       </table>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
+        <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#9ca3af;">Location:</p>
+        <p style="margin:4px 0 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:500;">Barker House Home for Students<br/>NE2 1XR</p>
+      </div>
     </div>
 
     ${

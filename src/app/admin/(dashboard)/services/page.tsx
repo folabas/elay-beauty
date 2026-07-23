@@ -380,7 +380,7 @@ export default function AdminServicesPage() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <button
                 onClick={saveService}
-                disabled={saving || !form.name || !form.price}
+                disabled={saving || !form.name || (pricingMode === "single" && !form.price) || (pricingMode === "tier" && form.pricingTier.every((t) => !t.price))}
                 className="w-full sm:w-auto rounded-full bg-accent px-8 py-4 sm:py-3 text-[11px] font-bold uppercase tracking-widest text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50 shadow-md hover:-translate-y-1 hover:shadow-glow"
               >
                 {saving ? "..." : editingId ? "Update" : "Add Service"}

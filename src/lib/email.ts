@@ -127,7 +127,7 @@ export function bookingConfirmationEmail(params: {
       </table>
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
         <p style="margin:0;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#9ca3af;">Location:</p>
-        <p style="margin:4px 0 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:500;">Barker House Home for Students<br/>NE2 1XR</p>
+        <p style="margin:4px 0 0;font-family:'Inter',Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:500;">Clarence Street, Shieldfield<br/>Newcastle upon Tyne, NE2 1YN</p>
       </div>
     </div>
 

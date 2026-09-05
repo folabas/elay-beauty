@@ -55,7 +55,7 @@ function wrapHtml(title: string, content: string): string {
       </div>
       <div class="footer">
         <hr class="divider" />
-        <p>EL.AY Beauty &ndash; London, UK</p>
+        <p>EL.AY Beauty &ndash; Newcastle upon Tyne, UK</p>
         <p><a href="https://elay-beauty.vercel.app/contact">Contact us</a> &middot; <a href="https://wa.link/wycx8l">WhatsApp</a></p>
       </div>
     </div>

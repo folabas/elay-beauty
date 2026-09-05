@@ -16,7 +16,7 @@ const paymentDetails = {
 }
 
 const reviews = [
-  { name: "Sarah M.", text: "Absolutely loved my knotless braids! Elizabeth was incredibly gentle and the parts are so neat. Best braiding experience in London.", rating: 5 },
+  { name: "Sarah M.", text: "Absolutely loved my knotless braids! Elizabeth was incredibly gentle and the parts are so neat. Best braiding experience in Newcastle.", rating: 5 },
   { name: "Chloe T.", text: "My daughter usually cries when getting her hair done, but she was so relaxed here. The children's styling is top tier.", rating: 5 },
   { name: "Jessica R.", text: "The silk press lasted weeks! Such a premium service and beautiful environment. Highly recommend.", rating: 5 },
 ]
@@ -110,7 +110,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-primary">Location</p>
-                  <p className="text-sm text-primary/70">London, UK</p>
+                  <p className="text-sm text-primary/70">Clarence Street, Shieldfield<br/>Newcastle upon Tyne, NE2 1YN</p>
                 </div>
               </div>
 

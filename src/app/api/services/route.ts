@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(service)
+    return NextResponse.json({
+      ...service,
+      pricingTier: service.pricingTier ? JSON.parse(service.pricingTier) : null,
+    })
   } catch (error) {
     console.error("Failed to create service:", error)
     return NextResponse.json({ error: "Failed to create service" }, { status: 500 })
@@ -69,7 +72,10 @@ export async function PUT(request: Request) {
     if (durationRange !== undefined) data.durationRange = durationRange
 
     const service = await prisma.service.update({ where: { id }, data })
-    return NextResponse.json(service)
+    return NextResponse.json({
+      ...service,
+      pricingTier: service.pricingTier ? JSON.parse(service.pricingTier) : null,
+    })
   } catch (error) {
     console.error("Failed to update service:", error)
     return NextResponse.json({ error: "Failed to update service" }, { status: 500 })

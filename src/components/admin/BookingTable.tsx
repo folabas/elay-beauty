@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import CancelBookingDialog from "./CancelBookingDialog"
 import BookingDetailsDialog from "./BookingDetailsDialog"
-import { CheckCircle, XCircle, Eye, CreditCard, ChevronRight } from "lucide-react"
+import { CheckCircle, XCircle, Eye, CreditCard, Trash2 } from "lucide-react"
 
 interface BookingRow {
   id: string
@@ -43,6 +43,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
   const [bookings, setBookings] = useState(initial)
   const [cancelTarget, setCancelTarget] = useState<BookingRow | null>(null)
   const [viewing, setViewing] = useState<BookingRow | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<BookingRow | null>(null)
   const [filter, setFilter] = useState<string>("all")
   const [processing, setProcessing] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
@@ -59,6 +60,7 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
       if (e.key === "Escape") {
         setCancelTarget(null)
         setViewing(null)
+        setDeleteTarget(null)
       }
     }
     document.addEventListener("keydown", handleEsc)
@@ -126,6 +128,30 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
       showToast(`Error: ${err instanceof Error ? err.message : "Failed to mark paid"}`)
     } finally {
       setProcessing(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setProcessing(deleteTarget.id)
+
+    try {
+      const res = await fetch(`/api/bookings/${deleteTarget.id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to delete")
+      }
+
+      setBookings(bookings.filter((b) => b.id !== deleteTarget.id))
+      showToast(`Booking #${deleteTarget.id.slice(0, 8)} deleted.`)
+    } catch (err) {
+      showToast(`Error: ${err instanceof Error ? err.message : "Failed to delete"}`)
+    } finally {
+      setProcessing(null)
+      setDeleteTarget(null)
     }
   }
 
@@ -219,6 +245,14 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                         </button>
                       )}
                       <button
+                        onClick={() => setDeleteTarget(booking)}
+                        disabled={processing === booking.id}
+                        className="rounded-lg p-2 text-red-400 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                        title="Delete booking"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => setViewing(booking)}
                         className="rounded-lg p-2 text-accent-dark transition-colors hover:bg-accent/10"
                         title="View details"
@@ -282,6 +316,13 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
                           </button>
                         )}
                         <button
+                          onClick={() => setDeleteTarget(booking)}
+                          className="rounded-lg p-1.5 text-red-400 transition-colors hover:bg-red-50 active:scale-95"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => setViewing(booking)}
                           className="rounded-lg p-1.5 text-accent-dark transition-colors hover:bg-accent/10 active:scale-95"
                           title="View"
@@ -315,6 +356,52 @@ export default function BookingTable({ bookings: initial }: { bookings: BookingR
             booking={viewing}
             onClose={() => setViewing(null)}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+            onClick={() => setDeleteTarget(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md rounded-xl bg-card p-6 shadow-elevated"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="font-serif text-lg font-bold text-primary">
+                Delete Booking #{deleteTarget.id.slice(0, 8)}
+              </h2>
+              <p className="mt-2 text-sm text-muted">
+                Are you sure you want to permanently delete the booking for{" "}
+                <span className="font-medium text-primary">{deleteTarget.client}</span>{" "}
+                ({deleteTarget.service})? This cannot be undone.
+              </p>
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  onClick={() => setDeleteTarget(null)}
+                  className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted transition-all duration-200 hover:bg-background active:scale-95"
+                >
+                  Keep Booking
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={processing === deleteTarget.id}
+                  className="rounded-lg bg-burgundy px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-burgundy-light active:scale-95 disabled:opacity-50"
+                >
+                  {processing === deleteTarget.id ? "Deleting..." : "Delete Booking"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

@@ -113,3 +113,33 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Failed to update booking" }, { status: 500 })
   }
 }
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      select: { id: true, googleEventId: true },
+    })
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 })
+    }
+
+    if (booking.googleEventId) {
+      deleteBookingEvent(booking.googleEventId).catch((err) =>
+        console.error("[CALENDAR] Failed to delete event:", err)
+      )
+    }
+
+    await prisma.booking.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ message: "Booking deleted" }, { status: 200 })
+  } catch (error) {
+    console.error("Booking delete failed:", error)
+    return NextResponse.json({ error: "Failed to delete booking" }, { status: 500 })
+  }
+}

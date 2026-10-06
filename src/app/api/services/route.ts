@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/admin-auth"
 
 export async function GET() {
   try {
@@ -18,6 +19,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   try {
     const body = await request.json()
     const { name, category, price, pricingTier, description, duration, durationRange, requiresHairInfo, imageUrl } = body
@@ -51,6 +55,9 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   try {
     const body = await request.json()
     const { id, name, category, price, pricingTier, description, duration, durationRange, requiresHairInfo, isActive, imageUrl } = body
@@ -83,6 +90,9 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const unauthorized = await requireAdmin()
+  if (unauthorized) return unauthorized
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")

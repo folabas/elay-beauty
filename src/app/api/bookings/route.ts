@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, bookingConfirmationEmail, adminNotificationEmail } from "@/lib/email"
+import { getDateStatus, isDateString } from "@/lib/availability"
 
 export async function POST(request: Request) {
   try {
@@ -19,19 +20,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 })
     }
 
-    const dateStart = new Date(date + "T00:00:00Z")
-    const dateEnd = new Date(date + "T23:59:59Z")
+    if (!isDateString(date)) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 })
+    }
 
-    const existing = await prisma.booking.findFirst({
-      where: {
-        date: { gte: dateStart, lt: dateEnd },
-        time,
-        status: { not: "CANCELLED" },
-      },
-    })
+    const dayStatus = await getDateStatus(date)
 
-    if (existing) {
-      return NextResponse.json({ error: "This time slot is already booked" }, { status: 409 })
+    if (dayStatus.isPast || !dayStatus.open || !dayStatus.slots.includes(time)) {
+      return NextResponse.json({ error: "This date or time is not available" }, { status: 409 })
+    }
+
+    // Only one appointment is taken per day.
+    if (dayStatus.booked) {
+      return NextResponse.json({ error: "This day is already booked" }, { status: 409 })
     }
 
     let user = await prisma.user.findUnique({ where: { email } })

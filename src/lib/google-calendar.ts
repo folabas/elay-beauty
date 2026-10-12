@@ -23,7 +23,8 @@ function getOAuthClient() {
     throw new Error(`Google Calendar not configured: missing ${missing.join(", ")}. Set these in your environment variables.`)
   }
 
-  return new google.auth.OAuth2(clientId, clientSecret, redirectUri)
+  // forceRefreshOnFailure: if Google rejects the access token, get a new one and retry.
+  return new google.auth.OAuth2({ clientId, clientSecret, redirectUri, forceRefreshOnFailure: true })
 }
 
 export function getAuthUrl(): string {
@@ -66,7 +67,8 @@ export async function saveTokensFromCode(code: string): Promise<void> {
   const data = {
     accessToken: tokens.access_token!,
     refreshToken: tokens.refresh_token,
-    expiryDate: new Date(Date.now() + (tokens.expiry_date ?? 3600 * 1000)),
+    // expiry_date is already an absolute timestamp, not a duration.
+    expiryDate: new Date(tokens.expiry_date ?? Date.now() + 3600 * 1000),
     email,
   }
 
@@ -91,11 +93,16 @@ async function getCalendarClient() {
   if (!stored) throw new Error("Google Calendar not connected")
 
   const oauth2Client = getOAuthClient()
-  oauth2Client.setCredentials({
-    access_token: stored.accessToken,
-    refresh_token: stored.refreshToken,
-    expiry_date: stored.expiryDate.getTime(),
-  })
+  // Access tokens last about an hour. Older connections were saved with an expiry far in
+  // the future, so an implausible expiry means "unknown": drop the access token and let
+  // the refresh token fetch a new one.
+  const expiry = stored.expiryDate.getTime()
+  const expiryIsPlausible = expiry < Date.now() + 2 * 60 * 60 * 1000
+  oauth2Client.setCredentials(
+    expiryIsPlausible
+      ? { access_token: stored.accessToken, refresh_token: stored.refreshToken, expiry_date: expiry }
+      : { refresh_token: stored.refreshToken }
+  )
 
   oauth2Client.on("tokens", async (tokens) => {
     const update: Record<string, unknown> = {}
@@ -120,9 +127,12 @@ interface BookingForCalendar {
   notes: string | null
 }
 
-export async function createBookingEvent(booking: BookingForCalendar) {
-  const calendar = await getCalendarClient()
+interface EventOptions {
+  /** True while the deposit hasn't been paid yet. */
+  pending?: boolean
+}
 
+function buildEvent(booking: BookingForCalendar, { pending = false }: EventOptions = {}) {
   const dateStr = booking.date.toISOString().split("T")[0]
   const [hours, minutes] = booking.time.split(":").map(Number)
 
@@ -134,9 +144,10 @@ export async function createBookingEvent(booking: BookingForCalendar) {
 
   const pad = (n: number) => String(n).padStart(2, "0")
 
-  const event = {
-    summary: `EL.AY Beauty – ${booking.service.name} – ${booking.client.name}`,
+  return {
+    summary: `EL.AY Beauty – ${booking.service.name} – ${booking.client.name}${pending ? " (deposit pending)" : ""}`,
     description: [
+      pending ? "Status: awaiting deposit" : "Status: deposit paid",
       `Client: ${booking.client.name}`,
       booking.client.phone ? `Phone: ${booking.client.phone}` : null,
       `Service: ${booking.service.name}`,
@@ -161,49 +172,19 @@ export async function createBookingEvent(booking: BookingForCalendar) {
       ],
     },
   }
+}
 
+export async function createBookingEvent(booking: BookingForCalendar, options?: EventOptions) {
+  const calendar = await getCalendarClient()
   const calendarId = process.env.GOOGLE_CALENDAR_ID ?? "primary"
-  const response = await calendar.events.insert({ calendarId, requestBody: event })
+  const response = await calendar.events.insert({ calendarId, requestBody: buildEvent(booking, options) })
   return response.data
 }
 
-export async function updateBookingEvent(eventId: string, booking: BookingForCalendar) {
+export async function updateBookingEvent(eventId: string, booking: BookingForCalendar, options?: EventOptions) {
   const calendar = await getCalendarClient()
-
-  const dateStr = booking.date.toISOString().split("T")[0]
-  const [hours, minutes] = booking.time.split(":").map(Number)
-
-  const durationMinutes = booking.service.duration ?? 60
-  const startTotal = hours * 60 + minutes
-  const endTotal = startTotal + durationMinutes
-  const endHours = Math.floor(endTotal / 60)
-  const endMinutes = endTotal % 60
-
-  const pad = (n: number) => String(n).padStart(2, "0")
-
-  const event = {
-    summary: `EL.AY Beauty – ${booking.service.name} – ${booking.client.name}`,
-    description: [
-      `Client: ${booking.client.name}`,
-      booking.client.phone ? `Phone: ${booking.client.phone}` : null,
-      `Service: ${booking.service.name}`,
-      `Total: £${booking.totalPrice}`,
-      booking.notes ? `Notes: ${booking.notes}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n"),
-    start: {
-      dateTime: `${dateStr}T${pad(hours)}:${pad(minutes)}:00`,
-      timeZone: TIMEZONE,
-    },
-    end: {
-      dateTime: `${dateStr}T${pad(endHours)}:${pad(endMinutes)}:00`,
-      timeZone: TIMEZONE,
-    },
-  }
-
   const calendarId = process.env.GOOGLE_CALENDAR_ID ?? "primary"
-  const response = await calendar.events.update({ calendarId, eventId, requestBody: event })
+  const response = await calendar.events.update({ calendarId, eventId, requestBody: buildEvent(booking, options) })
   return response.data
 }
 
@@ -213,7 +194,8 @@ export async function deleteBookingEvent(eventId: string) {
     const calendarId = process.env.GOOGLE_CALENDAR_ID ?? "primary"
     await calendar.events.delete({ calendarId, eventId })
   } catch (error: any) {
-    if (error?.code === 410) return
+    // Already gone from the calendar.
+    if (error?.code === 410 || error?.code === 404) return
     throw error
   }
 }

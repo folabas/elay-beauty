@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, bookingConfirmationEmail, cancellationEmail, rescheduleOfferEmail } from "@/lib/email"
-import { createBookingEvent, deleteBookingEvent } from "@/lib/google-calendar"
+import { createBookingEvent, updateBookingEvent, deleteBookingEvent } from "@/lib/google-calendar"
 import { requireAdmin } from "@/lib/admin-auth"
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -44,12 +44,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
       let calendarWarning: string | undefined
       try {
-        const event = await createBookingEvent(updated)
-        if (event.id) {
-          await prisma.booking.update({
-            where: { id },
-            data: { googleEventId: event.id },
-          })
+        if (updated.googleEventId) {
+          // The event was added when the booking was made; drop its "deposit pending" label.
+          await updateBookingEvent(updated.googleEventId, updated)
+        } else {
+          const event = await createBookingEvent(updated)
+          if (event.id) {
+            await prisma.booking.update({
+              where: { id },
+              data: { googleEventId: event.id },
+            })
+          }
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Unknown error"
@@ -75,7 +80,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       })
 
       if (booking.googleEventId) {
-        deleteBookingEvent(booking.googleEventId).catch((err) =>
+        // Awaited so the serverless function isn't frozen before the event is removed.
+        await deleteBookingEvent(booking.googleEventId).catch((err) =>
           console.error("[CALENDAR] Failed to delete event:", err)
         )
       }

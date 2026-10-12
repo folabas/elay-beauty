@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendEmail, bookingConfirmationEmail, adminNotificationEmail } from "@/lib/email"
 import { getDateStatus, isDateString } from "@/lib/availability"
+import { createBookingEvent } from "@/lib/google-calendar"
 
 export async function POST(request: Request) {
   try {
@@ -58,6 +59,19 @@ export async function POST(request: Request) {
         selectedSize: selectedSize || null,
       },
     })
+
+    // Put the appointment on the calendar straight away. A calendar problem must not fail the booking.
+    try {
+      const event = await createBookingEvent(
+        { ...booking, client: user, service },
+        { pending: true }
+      )
+      if (event.id) {
+        await prisma.booking.update({ where: { id: booking.id }, data: { googleEventId: event.id } })
+      }
+    } catch (err) {
+      console.error("[CALENDAR] Failed to create event for new booking:", err)
+    }
 
     const depositRequired = true
 

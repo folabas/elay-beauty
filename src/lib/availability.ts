@@ -80,7 +80,7 @@ function parseSlots(timeSlots: string | null): string[] | null {
 /** Creates the Saturday/Sunday weekly rows if they don't exist yet. */
 export async function ensureWeeklySchedule() {
   const existing = await prisma.availability.findMany({
-    where: { isRecurring: true, dayOfWeek: { in: WORKING_DAYS } },
+    where: { isRecurring: true, specificDate: null, dayOfWeek: { in: WORKING_DAYS } },
     select: { dayOfWeek: true },
   })
   const have = new Set(existing.map((d) => d.dayOfWeek))
@@ -100,18 +100,57 @@ export async function ensureWeeklySchedule() {
   }
 }
 
-export async function getWeeklySchedule() {
+/**
+ * Loads the weekly schedule plus any scheduled changes to it.
+ *
+ * A recurring row with no specificDate is the current weekly rule for that weekday.
+ * A recurring row WITH a specificDate is a scheduled change: from that date onwards
+ * it replaces the weekly rule. Once its date arrives it is merged into the weekly
+ * rule here, so `scheduled` only ever holds future changes.
+ */
+export async function loadWeekly() {
   await ensureWeeklySchedule()
   const rows = await prisma.availability.findMany({
     where: { isRecurring: true, dayOfWeek: { in: WORKING_DAYS } },
     orderBy: { createdAt: "asc" },
   })
+
   // If duplicates ever got created, the oldest row wins.
-  const byDay = new Map<number, (typeof rows)[number]>()
+  const base = new Map<number, (typeof rows)[number]>()
   for (const row of rows) {
-    if (row.dayOfWeek !== null && !byDay.has(row.dayOfWeek)) byDay.set(row.dayOfWeek, row)
+    if (row.dayOfWeek !== null && !row.specificDate && !base.has(row.dayOfWeek)) base.set(row.dayOfWeek, row)
   }
-  return byDay
+
+  const today = todayString()
+  const scheduled: typeof rows = []
+  const pending = rows
+    .filter((r) => r.specificDate && r.dayOfWeek !== null && base.has(r.dayOfWeek))
+    .sort((a, b) => a.specificDate!.getTime() - b.specificDate!.getTime())
+
+  for (const change of pending) {
+    if (toDateString(change.specificDate!) > today) {
+      scheduled.push(change)
+      continue
+    }
+    const current = base.get(change.dayOfWeek!)!
+    const updated = await prisma.availability.update({
+      where: { id: current.id },
+      data: {
+        isActive: change.isActive,
+        startTime: change.startTime,
+        endTime: change.endTime,
+        timeSlots: change.timeSlots,
+      },
+    })
+    await prisma.availability.deleteMany({ where: { id: change.id } })
+    base.set(change.dayOfWeek!, updated)
+  }
+
+  return { base, scheduled }
+}
+
+export async function getWeeklySchedule() {
+  return (await loadWeekly()).base
 }
 
 /**
@@ -127,8 +166,8 @@ export async function getDateStatuses(from: string, to: string): Promise<DateSta
   const fromStart = toUTCDate(from)
   const toEnd = new Date(to + "T23:59:59.999Z")
 
-  const [weekly, overrides, blocked, bookings] = await Promise.all([
-    getWeeklySchedule(),
+  const [{ base: weekly, scheduled }, overrides, blocked, bookings] = await Promise.all([
+    loadWeekly(),
     prisma.availability.findMany({
       where: { isRecurring: false, specificDate: { gte: fromStart, lte: toEnd } },
       orderBy: { createdAt: "desc" },
@@ -163,7 +202,10 @@ export async function getDateStatuses(from: string, to: string): Promise<DateSta
       return date >= start && date <= end
     })
     const override = overrideByDate.get(date)
-    const week = weekly.get(dayOfWeek)
+    // Latest scheduled change that has started by this date, else the current weekly rule.
+    const week =
+      scheduled.filter((s) => s.dayOfWeek === dayOfWeek && toDateString(s.specificDate!) <= date).pop() ??
+      weekly.get(dayOfWeek)
 
     const status: DateStatus = {
       date,

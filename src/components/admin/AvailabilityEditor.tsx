@@ -10,6 +10,7 @@ interface DaySchedule {
   end: string
   timeSlots: string[] | null
   isActive: boolean
+  scheduled: { id: string; from: string; isActive: boolean }[]
 }
 
 interface DateStatus {
@@ -219,6 +220,7 @@ export default function AvailabilityEditor() {
   const [busy, setBusy] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
+  const [weeklyChange, setWeeklyChange] = useState<{ id: string; from: string } | null>(null)
 
   const today = localDateString(new Date())
   const [bulk, setBulk] = useState({ saturday: true, sunday: true, from: "", to: "" })
@@ -277,16 +279,49 @@ export default function AvailabilityEditor() {
     }
   }
 
-  const toggleWeekly = (day: DaySchedule) => {
-    if (
-      day.isActive &&
-      !confirm(
-        `Turn off ALL ${day.day}s?\n\nTo close just one ${day.day} (or a few), use "Upcoming weekends" or "Close or open several dates" below instead.`
-      )
-    ) {
-      return
+  // The weekly switch doesn't apply straight away: it opens a panel asking when the change starts.
+  const nextOccurrence = (dayName: string) => {
+    const target = dayName === "Sunday" ? 0 : 6
+    let d = today
+    while (new Date(d + "T00:00:00").getDay() !== target) d = addDays(d, 1)
+    return d
+  }
+
+  const startWeeklyChange = (day: DaySchedule) => {
+    setEditing(null)
+    setWeeklyChange(weeklyChange?.id === day.id ? null : { id: day.id, from: nextOccurrence(day.day) })
+  }
+
+  const confirmWeeklyChange = async (day: DaySchedule) => {
+    if (!weeklyChange?.from) return
+    const turningOn = !day.isActive
+    const later = weeklyChange.from > today
+    await updateWeekly(
+      day,
+      { isActive: turningOn, effectiveFrom: weeklyChange.from },
+      `${day.day}s ${turningOn ? "open" : "closed"} ${later ? `from ${formatDate(weeklyChange.from)}` : "from now"}`
+    )
+    setWeeklyChange(null)
+  }
+
+  const cancelScheduled = async (day: DaySchedule, id: string) => {
+    setBusy(day.id)
+    try {
+      const res = await fetch("/api/availability", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+      if (!res.ok) throw new Error()
+      const availRes = await fetch("/api/availability")
+      if (availRes.ok) setSchedule(await availRes.json())
+      await refreshDates()
+      showToast("Scheduled change removed")
+    } catch {
+      showToast("Failed to remove")
+    } finally {
+      setBusy(null)
     }
-    updateWeekly(day, { isActive: !day.isActive }, day.isActive ? `${day.day}s turned off` : `${day.day}s turned on`)
   }
 
   // ── Specific dates ─────────────────────────────────────────────────
@@ -429,7 +464,7 @@ export default function AvailabilityEditor() {
                 }`}
               >
                 <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <Toggle on={day.isActive} disabled={busy === day.id} onClick={() => toggleWeekly(day)} label={`Every ${day.day}`} />
+                  <Toggle on={day.isActive} disabled={busy === day.id} onClick={() => startWeeklyChange(day)} label={`Every ${day.day}`} />
                   <div className="min-w-0 flex-1">
                     <p className={`text-base font-bold ${day.isActive ? "text-primary" : "text-primary/40"}`}>Every {day.day}</p>
                     <p className="text-[11px] font-medium tracking-wide text-primary/60 truncate mt-0.5">
@@ -444,6 +479,67 @@ export default function AvailabilityEditor() {
                   Edit Times
                 </button>
               </div>
+
+              {weeklyChange?.id === day.id && (
+                <div className="mt-2 rounded-2xl border border-accent/30 bg-accent/5 p-5 space-y-3">
+                  <p className="text-sm font-bold text-primary">
+                    {day.isActive ? `Close every ${day.day}` : `Open every ${day.day}`} — starting when?
+                  </p>
+                  <div className="max-w-[220px]">
+                    <label className={labelClass}>Starting from</label>
+                    <input
+                      type="date"
+                      min={today}
+                      value={weeklyChange.from}
+                      onChange={(e) => setWeeklyChange({ id: day.id, from: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                  <p className="text-xs text-primary/60">
+                    {!weeklyChange.from
+                      ? "Pick a start date."
+                      : weeklyChange.from > today
+                        ? `${day.day}s stay ${day.isActive ? "open" : "closed"} until then, and are ${day.isActive ? "closed" : "open"} from ${formatDate(weeklyChange.from, { weekday: "long", day: "numeric", month: "long", year: "numeric" })} onwards.`
+                        : `Applies straight away to every ${day.day}.`}
+                    {day.isActive && " To close just one date, use Upcoming Weekends below instead."}
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => confirmWeeklyChange(day)}
+                      disabled={!weeklyChange.from || busy === day.id}
+                      className="rounded-full bg-accent px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white transition-all hover:bg-accent-dark active:scale-95 disabled:opacity-50 shadow-md"
+                    >
+                      {busy === day.id ? "..." : "Confirm"}
+                    </button>
+                    <button
+                      onClick={() => setWeeklyChange(null)}
+                      className="rounded-full border border-primary/10 bg-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-primary/70 transition-all hover:text-primary active:scale-95"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {day.scheduled.map((change) => (
+                <div
+                  key={change.id}
+                  className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-2.5"
+                >
+                  <p className="text-xs font-bold text-primary">
+                    {change.isActive ? "Opens" : "Closes"} every {day.day} from{" "}
+                    {formatDate(change.from, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                  <button
+                    onClick={() => cancelScheduled(day, change.id)}
+                    disabled={busy === day.id}
+                    className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+
               <AnimatePresence>
                 {editing === day.id && (
                   <TimeEditor

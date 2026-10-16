@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+// Weeks start on Monday.
+const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 type DayStatus = "open" | "booked" | "closed"
 
@@ -18,22 +19,40 @@ function toDateString(year: number, month: number, day: number) {
 
 export default function DatePicker({ selectedDate, onSelectDate }: DatePickerProps) {
   const [statuses, setStatuses] = useState<Record<string, DayStatus>>({})
-  const [loadedMonths, setLoadedMonths] = useState<string[]>([])
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const [failedKey, setFailedKey] = useState<string | null>(null)
+  const [reloadCount, setReloadCount] = useState(0)
   const [viewMonth, setViewMonth] = useState(() => new Date().getMonth())
   const [viewYear, setViewYear] = useState(() => new Date().getFullYear())
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay()
-  const monthKey = `${viewYear}-${viewMonth}`
-  const loading = !loadedMonths.includes(monthKey)
+  // Number of blank cells before the 1st, with Monday as the first column.
+  const leadingBlanks = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
+  const requestKey = `${viewYear}-${viewMonth}-${reloadCount}`
+  const loading = loadedKey !== requestKey && failedKey !== requestKey
+  const failed = failedKey === requestKey
+
+  // Re-check availability when the visitor comes back to the tab, so a page left
+  // open never shows dates the salon has since opened or closed.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setReloadCount((c) => c + 1)
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    return () => document.removeEventListener("visibilitychange", onVisible)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
+    const key = `${viewYear}-${viewMonth}-${reloadCount}`
     const from = toDateString(viewYear, viewMonth, 1)
     const to = toDateString(viewYear, viewMonth, daysInMonth)
 
-    fetch(`/api/availability/calendar?from=${from}&to=${to}`)
-      .then((res) => (res.ok ? res.json() : []))
+    fetch(`/api/availability/calendar?from=${from}&to=${to}`, { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      })
       .then((data: { date: string; status: DayStatus }[]) => {
         if (cancelled) return
         setStatuses((prev) => {
@@ -41,16 +60,17 @@ export default function DatePicker({ selectedDate, onSelectDate }: DatePickerPro
           for (const d of data) next[d.date] = d.status
           return next
         })
+        setLoadedKey(key)
       })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setLoadedMonths((prev) => [...prev, `${viewYear}-${viewMonth}`])
+      .catch(() => {
+        // Don't show a failed load as "everything closed".
+        if (!cancelled) setFailedKey(key)
       })
 
     return () => {
       cancelled = true
     }
-  }, [viewYear, viewMonth, daysInMonth])
+  }, [viewYear, viewMonth, daysInMonth, reloadCount])
 
   const now = new Date()
   const isCurrentMonth = viewYear === now.getFullYear() && viewMonth === now.getMonth()
@@ -108,7 +128,7 @@ export default function DatePicker({ selectedDate, onSelectDate }: DatePickerPro
             {name}
           </div>
         ))}
-        {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+        {Array.from({ length: leadingBlanks }).map((_, i) => (
           <div key={`empty-${i}`} />
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -138,6 +158,15 @@ export default function DatePicker({ selectedDate, onSelectDate }: DatePickerPro
           )
         })}
       </div>
+
+      {failed && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+          <span>Couldn&apos;t load available dates.</span>
+          <button onClick={() => setReloadCount((c) => c + 1)} className="font-semibold underline">
+            Try again
+          </button>
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border pt-3 text-xs text-muted">
         <span className="flex items-center gap-1.5">
